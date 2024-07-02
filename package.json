@@ -30,7 +30,6 @@
   ],
   "dependencies": {
     "bluebird": "^3.5.1",
-    "lodash": "^4.17.4",
     "source-map-support": "^0.x"
   },
   "scripts": {
@@ -48,7 +47,6 @@
     "@appium/eslint-config-appium-ts": "^0.x",
     "@appium/tsconfig": "^0.x",
     "@types/bluebird": "^3.5.37",
-    "@types/lodash": "^4.14.189",
     "@types/node": "^20.4.7",
     "@typescript-eslint/eslint-plugin": "^6.9.0",
     "@typescript-eslint/parser": "^6.9.0",
