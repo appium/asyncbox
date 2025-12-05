@@ -50,7 +50,7 @@
     "@types/bluebird": "^3.5.37",
     "@types/lodash": "^4.14.189",
     "@types/node": "^20.4.7",
-    "@typescript-eslint/eslint-plugin": "^6.9.0",
+    "@typescript-eslint/eslint-plugin": "^8.48.1",
     "@typescript-eslint/parser": "^6.9.0",
     "chai": "^4.2.0",
     "chai-as-promised": "^7.1.1",
