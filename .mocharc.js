@@ -1,4 +1,4 @@
 module.exports = {
-  require: ['tsx/cjs'],
+  require: ['ts-node/register'],
   forbidOnly: Boolean(process.env.CI)
 };
