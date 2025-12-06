@@ -21,7 +21,7 @@ describe('sleep', function () {
   it('should work like setTimeout', async function () {
     const now = Date.now();
     await sleep(20);
-    expect(Date.now() - now).to.be.above(19);
+    expect(Date.now() - now).to.be.at.least(19);
   });
 });
 
@@ -29,12 +29,12 @@ describe('longSleep', function () {
   it('should work like sleep in general', async function () {
     const now = Date.now();
     await longSleep(20);
-    expect(Date.now() - now).to.be.above(19);
+    expect(Date.now() - now).to.be.at.least(19);
   });
   it('should work like sleep with values less than threshold', async function () {
     const now = Date.now();
     await longSleep(20, {thresholdMs: 100});
-    expect(Date.now() - now).to.be.above(19);
+    expect(Date.now() - now).to.be.at.least(19);
   });
   it('should work like sleep with values above threshold, but quantized', async function () {
     const now = Date.now();
@@ -265,7 +265,7 @@ describe('parallel', function () {
     } catch (e) {
       err = e as Error;
     }
-    expect(Date.now() - start).to.be.above(19);
+    expect(Date.now() - start).to.be.at.least(19);
     expect(Date.now() - start).to.be.below(49);
     expect(err).to.exist;
     expect(res).to.eql([]);
@@ -347,7 +347,7 @@ describe('asyncfilter', function () {
   it('should filter elements one at a time', async function () {
     const start = Date.now();
     expect(await asyncfilter(coll, filter, false)).to.eql([2, 4]);
-    expect(Date.now() - start).to.be.above(19);
+    expect(Date.now() - start).to.be.at.least(19);
   });
   it('should filter elements in parallel', async function () {
     const start = Date.now();
