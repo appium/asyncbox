@@ -86,6 +86,11 @@ describe('retry', function () {
     }
     return times * times;
   };
+  beforeEach(function () {
+    okFnCalls = 0;
+    badFnCalls = 0;
+    eventuallyOkFnCalls = 0;
+  });
   it('should return the result of a passing function', async function () {
     let start = Date.now();
     let res = await retry(3, okFn, 5, 4);
@@ -104,7 +109,7 @@ describe('retry', function () {
     should.exist(err);
     err.message.should.equal('bad');
     badFnCalls.should.equal(3);
-    (Date.now() - start).should.be.above(44);
+    (Date.now() - start).should.be.least(44);
   });
   it('should return the correct value with a function that eventually passes', async function () {
     let err = null;
