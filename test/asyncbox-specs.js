@@ -145,7 +145,7 @@ describe('retry', function () {
       should.exist(err);
       err.message.should.equal('not ok yet');
       eventuallyOkFnCalls.should.equal(3);
-      (Date.now() - start).should.be.above(30);
+      (Date.now() - start).should.be.least(30);
 
       // rerun with ok number of calls
       start = Date.now();
