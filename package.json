@@ -61,7 +61,6 @@
     "semantic-release": "^25.0.2",
     "sinon": "^21.0.0",
     "ts-node": "^10.9.1",
-    "tsx": "^4.21.0",
     "typescript": "^5.1.6"
   },
   "types": "./build/lib/asyncbox.d.ts"
