@@ -52,7 +52,7 @@
     "@types/lodash": "^4.14.189",
     "@types/node": "^20.4.7",
     "chai": "^4.2.0",
-    "chai-as-promised": "^7.1.1",
+    "chai-as-promised": "^8.0.2",
     "conventional-changelog-conventionalcommits": "^9.0.0",
     "eslint": "^9.39.1",
     "mocha": "^10.0.0",
