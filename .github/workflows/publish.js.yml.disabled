@@ -1,3 +1,5 @@
+# Reenable this workflow as soon as the project is moved under the Appium org in npmjs
+
 name: Release
 
 on:
