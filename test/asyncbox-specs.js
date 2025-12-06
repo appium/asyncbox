@@ -79,7 +79,7 @@ describe('retry', function () {
     }
     return times * times;
   };
-  let eventuallyOkNoSleepFn = async function (times) { // eslint-disable-line require-await
+  let eventuallyOkNoSleepFn = async function (times) {
     eventuallyOkFnCalls++;
     if (eventuallyOkFnCalls < times) {
       throw new Error('not ok yet');
@@ -155,7 +155,7 @@ describe('retry', function () {
       const start = Date.now();
       try {
         await retryInterval(3, 2000, badFnCalls);
-      } catch (err) {
+      } catch {
         (Date.now() - start).should.be.below(4100);
       }
     });
