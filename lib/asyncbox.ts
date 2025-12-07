@@ -223,11 +223,3 @@ export async function waitForCondition<T>(
   };
   return await spin();
 }
-
-// Re-export types for convenience
-export type {
-  Progress,
-  ProgressCallback,
-  LongSleepOptions,
-  WaitForConditionOptions,
-} from './types.js';
