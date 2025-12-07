@@ -55,7 +55,6 @@
     "@semantic-release/changelog": "^6.0.1",
     "@semantic-release/git": "^10.0.1",
     "@types/bluebird": "^3.5.37",
-    "@types/chai": "^5.2.3",
     "@types/lodash": "^4.14.189",
     "@types/mocha": "^10.0.10",
     "@types/node": "^24.10.1",
