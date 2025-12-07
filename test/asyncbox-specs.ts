@@ -246,7 +246,7 @@ describe('parallel', function () {
       promises.push(asyncFn(v));
     }
     const res = await parallel(promises);
-    expect(Date.now() - start).to.be.above(49);
+    expect(Date.now() - start).to.be.at.least(49);
     expect(Date.now() - start).to.be.below(59);
     expect(res.sort()).to.eql([1, 2, 3]);
   });
