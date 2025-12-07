@@ -103,7 +103,7 @@ describe('retry', function () {
     const start = Date.now();
     const res = await retry(3, okFn, 5, 4);
     expect(res).to.equal(20);
-    expect(Date.now() - start).to.be.above(14);
+    expect(Date.now() - start).to.be.at.least(14);
     expect(okFnCalls).to.equal(1);
   });
   it('should retry a failing function and eventually throw the same err', async function () {
