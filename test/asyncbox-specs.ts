@@ -39,7 +39,7 @@ describe('longSleep', function () {
   it('should work like sleep with values above threshold, but quantized', async function () {
     const now = Date.now();
     await longSleep(50, {thresholdMs: 20, intervalMs: 40});
-    expect(Date.now() - now).to.be.above(79);
+    expect(Date.now() - now).to.be.at.least(79);
   });
   it('should trigger a progress callback if specified', async function () {
     let callCount = 0;
