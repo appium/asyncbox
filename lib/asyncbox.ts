@@ -1,14 +1,13 @@
 import B from 'bluebird';
 import _ from 'lodash';
+import type {LongSleepOptions, WaitForConditionOptions} from './types.js';
 
 const LONG_SLEEP_THRESHOLD = 5000; // anything over 5000ms will turn into a spin
 
 /**
  * An async/await version of setTimeout
- * @param {number} ms
- * @returns {Promise<void>}
  */
-async function sleep (ms) {
+export async function sleep(ms: number): Promise<void> {
   return await B.delay(ms);
 }
 
@@ -17,24 +16,20 @@ async function sleep (ms) {
  * times. To safely wait for these long times (e.g. in the 5+ minute range), you
  * can use `longSleep`.
  *
- * sYou can also pass a `progressCb` option which is a callback function that
+ * You can also pass a `progressCb` option which is a callback function that
  * receives an object with the properties `elapsedMs`, `timeLeft`, and
  * `progress`. This will be called on every wait interval so you can do your
  * wait logging or whatever.
- * @param {number} ms
- * @param {LongSleepOptions} [opts]
- * @returns {Promise<void>}
  */
-async function longSleep (ms, {
-  thresholdMs = LONG_SLEEP_THRESHOLD,
-  intervalMs = 1000,
-  progressCb = null,
-} = {}) {
+export async function longSleep(
+  ms: number,
+  {thresholdMs = LONG_SLEEP_THRESHOLD, intervalMs = 1000, progressCb = null}: LongSleepOptions = {},
+): Promise<void> {
   if (ms < thresholdMs) {
     return await sleep(ms);
   }
   const endAt = Date.now() + ms;
-  let timeLeft;
+  let timeLeft: number;
   let elapsedMs = 0;
   do {
     const pre = Date.now();
@@ -50,16 +45,15 @@ async function longSleep (ms, {
 
 /**
  * An async/await way of running a method until it doesn't throw an error
- * @template [T=any]
- * @param {number} times
- * @param {(...args: any[]) => Promise<T>} fn
- * @param  {...any} args
- * @returns {Promise<T?>}
  */
-async function retry (times, fn, ...args) {
+export async function retry<T = any>(
+  times: number,
+  fn: (...args: any[]) => Promise<T>,
+  ...args: any[]
+): Promise<T | null> {
   let tries = 0;
   let done = false;
-  let res = null;
+  let res: T | null = null;
   while (!done && tries < times) {
     tries++;
     try {
@@ -77,18 +71,17 @@ async function retry (times, fn, ...args) {
 /**
  * You can also use `retryInterval` to add a sleep in between retries. This can
  * be useful if you want to throttle how fast we retry.
- * @template [T=any]
- * @param {number} times
- * @param {number} sleepMs
- * @param {(...args: any[]) => Promise<T>} fn
- * @param  {...any} args
- * @returns {Promise<T?>}
  */
-async function retryInterval (times, sleepMs, fn, ...args) {
+export async function retryInterval<T = any>(
+  times: number,
+  sleepMs: number,
+  fn: (...args: any[]) => Promise<T>,
+  ...args: any[]
+): Promise<T | null> {
   let count = 0;
-  let wrapped = async () => {
+  const wrapped = async (): Promise<T> => {
     count++;
-    let res;
+    let res: T;
     try {
       res = await fn(...args);
     } catch (e) {
@@ -103,59 +96,55 @@ async function retryInterval (times, sleepMs, fn, ...args) {
   return await retry(times, wrapped);
 }
 
-const parallel = B.all;
+export const parallel = B.all;
 
 /**
  * Export async functions (Promises) and import this with your ES5 code to use
  * it with Node.
- * @template [R=any]
- * @param {any} promisey
- * @param {(err: any, value?: R) => void} cb
- * @returns {Promise<R>}
  */
-function nodeify (promisey, cb) { // eslint-disable-line promise/prefer-await-to-callbacks
+// eslint-disable-next-line promise/prefer-await-to-callbacks
+export function nodeify<R = any>(promisey: any, cb: (err: any, value?: R) => void): Promise<R> {
   return B.resolve(promisey).nodeify(cb);
 }
 
 /**
  * Node-ify an entire object of `Promise`-returning functions
- * @param {Record<string,(...args: any[]) => any>} promiseyMap
- * @returns {Record<string,(...args: any[])=>void>}
  */
-function nodeifyAll (promiseyMap) {
-  /** @type {Record<string,(...args: any[])=>void>} */
-  let cbMap = {};
+export function nodeifyAll<T extends Record<string, (...args: any[]) => any>>(
+  promiseyMap: T,
+): Record<string, (...args: any[]) => void> {
+  const cbMap: Record<string, (...args: any[]) => void> = {};
   for (const [name, fn] of _.toPairs(promiseyMap)) {
-    cbMap[name] = function (...args) {
-      const _cb = args.slice(-1)[0];
-      args = args.slice(0, -1);
-      nodeify(fn(...args), _cb);
+    cbMap[name] = function (...args: any[]) {
+      const _cb = args.slice(-1)[0] as (err: any, ...values: any[]) => void;
+      const fnArgs = args.slice(0, -1);
+      nodeify(fn(...fnArgs), _cb);
     };
   }
   return cbMap;
 }
 
 /**
- * @param {(...args: any[]) => any|Promise<any>} fn
- * @param  {...any} args
+ * Fire and forget async function execution
  */
-function asyncify (fn, ...args) {
+export function asyncify(fn: (...args: any[]) => any | Promise<any>, ...args: any[]): void {
   B.resolve(fn(...args)).done();
 }
 
 /**
- * Similar to `Array.prototype.map`; runs in serial
- * @param {any[]} coll
- * @param {(value: any) => any|Promise<any>} mapper
- * @returns {Promise<any[]>}
+ * Similar to `Array.prototype.map`; runs in serial or parallel
  */
-async function asyncmap (coll, mapper, runInParallel = true) {
+export async function asyncmap<T, R>(
+  coll: T[],
+  mapper: (value: T) => R | Promise<R>,
+  runInParallel = true,
+): Promise<R[]> {
   if (runInParallel) {
     return parallel(coll.map(mapper));
   }
 
-  let newColl = [];
-  for (let item of coll) {
+  const newColl: R[] = [];
+  for (const item of coll) {
     newColl.push(await mapper(item));
   }
   return newColl;
@@ -163,22 +152,22 @@ async function asyncmap (coll, mapper, runInParallel = true) {
 
 /**
  * Similar to `Array.prototype.filter`
- * @param {any[]} coll
- * @param {(value: any) => any|Promise<any>} filter
- * @param {boolean} runInParallel
- * @returns {Promise<any[]>}
  */
-async function asyncfilter (coll, filter, runInParallel = true) {
-  let newColl = [];
+export async function asyncfilter<T>(
+  coll: T[],
+  filter: (value: T) => boolean | Promise<boolean>,
+  runInParallel = true,
+): Promise<T[]> {
+  const newColl: T[] = [];
   if (runInParallel) {
-    let bools = await parallel(coll.map(filter));
+    const bools = await parallel(coll.map(filter));
     for (let i = 0; i < coll.length; i++) {
       if (bools[i]) {
         newColl.push(coll[i]);
       }
     }
   } else {
-    for (let item of coll) {
+    for (const item of coll) {
       if (await filter(item)) {
         newColl.push(item);
       }
@@ -199,14 +188,12 @@ async function asyncfilter (coll, filter, runInParallel = true) {
  * error then this exception will be immediately passed through.
  *
  * The default options are: `{ waitMs: 5000, intervalMs: 500 }`
- * @template T
- * @param {() => Promise<T>|T} condFn
- * @param {WaitForConditionOptions} [options]
- * @returns {Promise<T>}
  */
-async function waitForCondition (condFn, options = {}) {
-  /** @type {WaitForConditionOptions & {waitMs: number, intervalMs: number}} */
-  const opts = _.defaults(options, {
+export async function waitForCondition<T>(
+  condFn: () => Promise<T> | T,
+  options: WaitForConditionOptions = {},
+): Promise<T> {
+  const opts: WaitForConditionOptions & {waitMs: number; intervalMs: number} = _.defaults(options, {
     waitMs: 5000,
     intervalMs: 500,
   });
@@ -214,8 +201,7 @@ async function waitForCondition (condFn, options = {}) {
   const error = opts.error;
   const begunAt = Date.now();
   const endAt = begunAt + opts.waitMs;
-  /** @returns {Promise<T>} */
-  const spin = async function spin () {
+  const spin = async function spin(): Promise<T> {
     const result = await condFn();
     if (result) {
       return result;
@@ -230,45 +216,18 @@ async function waitForCondition (condFn, options = {}) {
     }
     // if there is an error option, it is either a string message or an error itself
     throw error
-      ? (_.isString(error) ? new Error(error) : error)
+      ? _.isString(error)
+        ? new Error(error)
+        : error
       : new Error(`Condition unmet after ${waited} ms. Timing out.`);
   };
   return await spin();
 }
 
-export {
-  sleep, retry, nodeify, nodeifyAll, retryInterval, asyncify, parallel,
-  asyncmap, asyncfilter, waitForCondition, longSleep,
-};
-
-/**
- * Options for {@link waitForCondition}
- * @typedef WaitForConditionOptions
- * @property {number} [waitMs]
- * @property {number} [intervalMs]
- * @property {{debug: (...args: any[]) => void}} [logger]
- * @property {string|Error} [error]
- */
-
-/**
- * Options for {@link longSleep}
- * @typedef LongSleepOptions
- * @property {number} [thresholdMs]
- * @property {number} [intervalMs]
- * @property {ProgressCallback?} [progressCb]
- */
-
-/**
- * Parameter provided to a {@link ProgressCallback}
- * @typedef Progress
- * @property {number} elapsedMs
- * @property {number} timeLeft
- * @property {number} progress
- */
-
-/**
- * Progress callback for {@link longSleep}
- * @callback ProgressCallback
- * @param {Progress} progress
- * @returns {void}
- */
+// Re-export types for convenience
+export type {
+  Progress,
+  ProgressCallback,
+  LongSleepOptions,
+  WaitForConditionOptions,
+} from './types.js';
