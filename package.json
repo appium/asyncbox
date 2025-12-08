@@ -31,8 +31,7 @@
   ],
   "dependencies": {
     "bluebird": "^3.5.1",
-    "lodash": "^4.17.4",
-    "source-map-support": "^0.x"
+    "lodash": "^4.17.4"
   },
   "scripts": {
     "build": "tsc -b",
