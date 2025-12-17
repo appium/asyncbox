@@ -11,10 +11,10 @@
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/jlipps/asyncbox.git"
+    "url": "https://github.com/appium/asyncbox.git"
   },
   "bugs": {
-    "url": "https://github.com/jlipps/asyncbox/issues"
+    "url": "https://github.com/appium/asyncbox/issues"
   },
   "engines": {
     "node": "^20.19.0 || ^22.12.0 || >=24.0.0",
