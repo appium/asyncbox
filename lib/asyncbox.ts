@@ -1,11 +1,15 @@
 import B from 'bluebird';
 import _ from 'lodash';
-import type {LongSleepOptions, WaitForConditionOptions} from './types.js';
+import type {
+  LongSleepOptions,
+  WaitForConditionOptions,
+} from './types.js';
 
 const LONG_SLEEP_THRESHOLD = 5000; // anything over 5000ms will turn into a spin
 
 /**
  * An async/await version of setTimeout
+ * @param ms - The number of milliseconds to wait
  */
 export async function sleep(ms: number): Promise<void> {
   return await B.delay(ms);
@@ -20,10 +24,16 @@ export async function sleep(ms: number): Promise<void> {
  * receives an object with the properties `elapsedMs`, `timeLeft`, and
  * `progress`. This will be called on every wait interval so you can do your
  * wait logging or whatever.
+ * @param ms - The number of milliseconds to wait
+ * @param options - Options for controlling the long sleep behavior
  */
 export async function longSleep(
   ms: number,
-  {thresholdMs = LONG_SLEEP_THRESHOLD, intervalMs = 1000, progressCb = null}: LongSleepOptions = {},
+  {
+    thresholdMs = LONG_SLEEP_THRESHOLD,
+    intervalMs = 1000,
+    progressCb = null,
+  }: LongSleepOptions = {},
 ): Promise<void> {
   if (ms < thresholdMs) {
     return await sleep(ms);
@@ -45,6 +55,9 @@ export async function longSleep(
 
 /**
  * An async/await way of running a method until it doesn't throw an error
+ * @param times - The maximum number of times to retry the function
+ * @param fn - The async function to retry
+ * @param args - Arguments to pass to the function
  */
 export async function retry<T = any>(
   times: number,
@@ -71,6 +84,10 @@ export async function retry<T = any>(
 /**
  * You can also use `retryInterval` to add a sleep in between retries. This can
  * be useful if you want to throttle how fast we retry.
+ * @param times - The maximum number of times to retry the function
+ * @param sleepMs - The number of milliseconds to wait between retries
+ * @param fn - The async function to retry
+ * @param args - Arguments to pass to the function
  */
 export async function retryInterval<T = any>(
   times: number,
@@ -101,6 +118,8 @@ export const parallel = B.all;
 /**
  * Export async functions (Promises) and import this with your ES5 code to use
  * it with Node.
+ * @param promisey - A Promise or promise-like value to convert to a callback
+ * @param cb - The callback function to call with the result or error
  */
 // eslint-disable-next-line promise/prefer-await-to-callbacks
 export function nodeify<R = any>(promisey: any, cb: (err: any, value?: R) => void): Promise<R> {
@@ -109,6 +128,7 @@ export function nodeify<R = any>(promisey: any, cb: (err: any, value?: R) => voi
 
 /**
  * Node-ify an entire object of `Promise`-returning functions
+ * @param promiseyMap - An object containing functions that return Promises
  */
 export function nodeifyAll<T extends Record<string, (...args: any[]) => any>>(
   promiseyMap: T,
@@ -126,6 +146,8 @@ export function nodeifyAll<T extends Record<string, (...args: any[]) => any>>(
 
 /**
  * Fire and forget async function execution
+ * @param fn - The function to execute asynchronously
+ * @param args - Arguments to pass to the function
  */
 export function asyncify(fn: (...args: any[]) => any | Promise<any>, ...args: any[]): void {
   B.resolve(fn(...args)).done();
@@ -133,6 +155,9 @@ export function asyncify(fn: (...args: any[]) => any | Promise<any>, ...args: an
 
 /**
  * Similar to `Array.prototype.map`; runs in serial or parallel
+ * @param coll - The collection to map over
+ * @param mapper - The function to apply to each element
+ * @param runInParallel - Whether to run operations in parallel (default: true)
  */
 export async function asyncmap<T, R>(
   coll: T[],
@@ -152,6 +177,9 @@ export async function asyncmap<T, R>(
 
 /**
  * Similar to `Array.prototype.filter`
+ * @param coll - The collection to filter
+ * @param filter - The function to test each element
+ * @param runInParallel - Whether to run operations in parallel (default: true)
  */
 export async function asyncfilter<T>(
   coll: T[],
@@ -188,6 +216,8 @@ export async function asyncfilter<T>(
  * error then this exception will be immediately passed through.
  *
  * The default options are: `{ waitMs: 5000, intervalMs: 500 }`
+ * @param condFn - The condition function to evaluate
+ * @param options - Options for controlling the wait behavior
  */
 export async function waitForCondition<T>(
   condFn: () => Promise<T> | T,
@@ -215,11 +245,18 @@ export async function waitForCondition<T>(
       return await spin();
     }
     // if there is an error option, it is either a string message or an error itself
-    throw error
-      ? _.isString(error)
-        ? new Error(error)
-        : error
-      : new Error(`Condition unmet after ${waited} ms. Timing out.`);
+    if (error) {
+      throw _.isString(error) ? new Error(error) : error;
+    }
+    throw new Error(`Condition unmet after ${waited} ms. Timing out.`);
   };
   return await spin();
 }
+
+// Re-export types
+export type {
+  Progress,
+  ProgressCallback,
+  LongSleepOptions,
+  WaitForConditionOptions,
+} from './types.js';
