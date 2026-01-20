@@ -1,3 +1,9 @@
+## [4.1.0](https://github.com/appium/asyncbox/compare/v4.0.2...v4.1.0) (2026-01-20)
+
+### Features
+
+* remove nodeify* functions as obsolete ([#52](https://github.com/appium/asyncbox/issues/52)) ([b50a289](https://github.com/appium/asyncbox/commit/b50a289ddd07f86e80dbb9f89017a8a99160d209))
+
 ## [4.0.2](https://github.com/appium/asyncbox/compare/v4.0.1...v4.0.2) (2026-01-20)
 
 ### Miscellaneous Chores
