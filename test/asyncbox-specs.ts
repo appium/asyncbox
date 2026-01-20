@@ -5,8 +5,6 @@ import {
   longSleep,
   retry,
   retryInterval,
-  nodeify,
-  nodeifyAll,
   parallel,
   asyncmap,
   asyncfilter,
@@ -171,60 +169,6 @@ describe('retry', function () {
       } catch {
         expect(Date.now() - start).to.be.below(4100);
       }
-    });
-  });
-});
-
-describe('nodeifyAll', function () {
-  const asyncFn = async function (val: string): Promise<string> {
-    await sleep(15);
-    return val;
-  };
-  const asyncFn2 = async function (val: string): Promise<string[]> {
-    await sleep(15);
-    return [val, val + val];
-  };
-  const badAsyncFn = async function (): Promise<never> {
-    await sleep(15);
-    throw new Error('boo');
-  };
-  const cbMap = nodeifyAll({asyncFn, asyncFn2, badAsyncFn});
-  it('should turn async functions into nodey things', function (done) {
-    const start = Date.now();
-    nodeify(asyncFn('foo'), function (err: Error | null, val?: string, val2?: string) { // eslint-disable-line promise/prefer-await-to-callbacks
-      expect(err).to.not.exist;
-      expect(val2).to.not.exist;
-      expect(val!).to.equal('foo');
-      expect(Date.now() - start).to.be.at.least(14);
-      done();
-    });
-  });
-  it('should turn async functions into nodey things via nodeifyAll', function (done) {
-    const start = Date.now();
-    cbMap.asyncFn('foo', function (err: Error | null, val?: string, val2?: string) { // eslint-disable-line promise/prefer-await-to-callbacks
-      expect(err).to.not.exist;
-      expect(val2).to.not.exist;
-      expect(val!).to.equal('foo');
-      expect(Date.now() - start).to.be.at.least(14);
-      done();
-    });
-  });
-  it('should turn async functions into nodey things with mult params', function (done) {
-    const start = Date.now();
-    nodeify(asyncFn2('foo'), function (err: Error | null, val?: string[]) { // eslint-disable-line promise/prefer-await-to-callbacks
-      expect(err).to.not.exist;
-      expect(val!).to.eql(['foo', 'foofoo']);
-      expect(Date.now() - start).to.be.at.least(14);
-      done();
-    });
-  });
-  it('should handle errors correctly', function (done) {
-    const start = Date.now();
-    nodeify(badAsyncFn(), function (err: Error | null, val?: string) { // eslint-disable-line promise/prefer-await-to-callbacks
-      expect(val).to.not.exist;
-      expect(err!.message).to.equal('boo');
-      expect(Date.now() - start).to.be.at.least(14);
-      done();
     });
   });
 });

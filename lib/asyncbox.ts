@@ -1,9 +1,6 @@
 import B from 'bluebird';
 import _ from 'lodash';
-import type {
-  LongSleepOptions,
-  WaitForConditionOptions,
-} from './types.js';
+import type {LongSleepOptions, WaitForConditionOptions} from './types.js';
 
 const LONG_SLEEP_THRESHOLD = 5000; // anything over 5000ms will turn into a spin
 
@@ -29,11 +26,7 @@ export async function sleep(ms: number): Promise<void> {
  */
 export async function longSleep(
   ms: number,
-  {
-    thresholdMs = LONG_SLEEP_THRESHOLD,
-    intervalMs = 1000,
-    progressCb = null,
-  }: LongSleepOptions = {},
+  {thresholdMs = LONG_SLEEP_THRESHOLD, intervalMs = 1000, progressCb = null}: LongSleepOptions = {},
 ): Promise<void> {
   if (ms < thresholdMs) {
     return await sleep(ms);
@@ -114,35 +107,6 @@ export async function retryInterval<T = any>(
 }
 
 export const parallel = B.all;
-
-/**
- * Export async functions (Promises) and import this with your ES5 code to use
- * it with Node.
- * @param promisey - A Promise or promise-like value to convert to a callback
- * @param cb - The callback function to call with the result or error
- */
-// eslint-disable-next-line promise/prefer-await-to-callbacks
-export function nodeify<R = any>(promisey: any, cb: (err: any, value?: R) => void): Promise<R> {
-  return B.resolve(promisey).nodeify(cb);
-}
-
-/**
- * Node-ify an entire object of `Promise`-returning functions
- * @param promiseyMap - An object containing functions that return Promises
- */
-export function nodeifyAll<T extends Record<string, (...args: any[]) => any>>(
-  promiseyMap: T,
-): Record<string, (...args: any[]) => void> {
-  const cbMap: Record<string, (...args: any[]) => void> = {};
-  for (const [name, fn] of _.toPairs(promiseyMap)) {
-    cbMap[name] = function (...args: any[]) {
-      const _cb = args.slice(-1)[0] as (err: any, ...values: any[]) => void;
-      const fnArgs = args.slice(0, -1);
-      nodeify(fn(...fnArgs), _cb);
-    };
-  }
-  return cbMap;
-}
 
 /**
  * Fire and forget async function execution

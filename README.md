@@ -102,44 +102,6 @@ console.log(newItems); // [2, 4];
 By default, `asyncmap` and `asyncfilter` run their operations in parallel; you
 can pass `false` as a third argument to make sure it happens serially.
 
-### Nodeify
-
-Export async functions (Promises) and import this with your ES5 code to use it
-with Node.
-
-```js
-var asyncbox = require('asyncbox')
-  , sleep = asyncbox.sleep
-  , nodeify = asyncbox.nodeify;
-
-nodeify(sleep(1000), function (err, timer) {
-  console.log(err); // null
-  console.log(timer); // timer obj
-});
-```
-
-### nodeifyAll
-
-If you have a whole library you want to export nodeified versions of, it's pretty easy:
-
-```js
-import { nodeifyAll } from 'asyncbox';
-
-async function foo () { ... }
-async function bar () { ... }
-let cb = nodeifyAll({foo, bar});
-export { foo, bar, cb };
-```
-
-Then in my ES5 script I can do:
-
-```js
-var myLib = require('mylib').cb;
-
-myLib.foo(function (err) { ... });
-myLib.bar(function (err) { ... });
-```
-
 ### waitForCondition
 
 Takes a condition (a function returning a boolean or boolean promise),
