@@ -1,3 +1,14 @@
+## [6.0.0](https://github.com/appium/asyncbox/compare/v5.0.0...v6.0.0) (2026-01-21)
+
+### ⚠ BREAKING CHANGES
+
+* removed the `parallel` method. Use native `Promise.all` instead
+* removed the `asyncify` method. Call your async method directly
+
+### Features
+
+* remove `parallel` and `asyncify` as obsolete ([#55](https://github.com/appium/asyncbox/issues/55)) ([c757f52](https://github.com/appium/asyncbox/commit/c757f524e41420f807ebcd7977c0308223433b6f))
+
 ## [5.0.0](https://github.com/appium/asyncbox/compare/v4.1.1...v5.0.0) (2026-01-20)
 
 ### ⚠ BREAKING CHANGES
