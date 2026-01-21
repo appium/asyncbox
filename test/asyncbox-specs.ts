@@ -9,8 +9,6 @@ import {
   asyncfilter,
   waitForCondition,
 } from '../lib/asyncbox.js';
-import B from 'bluebird';
-import sinon from 'sinon';
 
 use(chaiAsPromised);
 
@@ -173,13 +171,6 @@ describe('retry', function () {
 });
 
 describe('waitForCondition', function () {
-  let requestSpy: sinon.SinonSpy;
-  beforeEach(function () {
-    requestSpy = sinon.spy(B, 'delay');
-  });
-  afterEach(function () {
-    requestSpy.restore();
-  });
   it('should wait and succeed', async function () {
     const ref = Date.now();
     function condFn (): boolean {
@@ -203,14 +194,14 @@ describe('waitForCondition', function () {
       expect(err.message).to.match(/Condition unmet/);
     }
   });
-  it('should not exceed implicit wait timeout', async function () {
+  it('should reduce interval to not exceed timeout', async function () {
     const ref = Date.now();
     function condFn (): boolean {
-      return Date.now() - ref > 15;
+      return Date.now() - ref > 25;
     }
-    await (waitForCondition(condFn, {waitMs: 20, intervalMs: 10}));
-    const getLastCall = requestSpy.getCall(1);
-    expect(getLastCall.args[0]).to.be.at.most(10);
+    await waitForCondition(condFn, {waitMs: 30, intervalMs: 20});
+    const duration = Date.now() - ref;
+    expect(duration).to.be.below(35);
   });
 });
 
