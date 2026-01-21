@@ -5,7 +5,6 @@ import {
   longSleep,
   retry,
   retryInterval,
-  parallel,
   asyncmap,
   asyncfilter,
   waitForCondition,
@@ -173,88 +172,45 @@ describe('retry', function () {
   });
 });
 
-describe('parallel', function () {
-  const asyncFn = async function (val: number): Promise<number> {
-    await sleep(50);
-    return val;
-  };
-  const badAsyncFn = async function (): Promise<never> {
-    await sleep(20);
-    throw new Error('boo');
-  };
-  it('should perform tasks in parallel and return results', async function () {
-    const vals = [1, 2, 3];
-    const promises: Promise<number>[] = [];
-    const start = Date.now();
-    for (const v of vals) {
-      promises.push(asyncFn(v));
-    }
-    const res = await parallel(promises);
-    expect(Date.now() - start).to.be.at.least(49);
-    expect(Date.now() - start).to.be.below(59);
-    expect(res.sort()).to.eql([1, 2, 3]);
+describe('waitForCondition', function () {
+  let requestSpy: sinon.SinonSpy;
+  beforeEach(function () {
+    requestSpy = sinon.spy(B, 'delay');
   });
-  it('should error with first response', async function () {
-    const vals = [1, 2, 3];
-    const promises: Promise<number>[] = [];
-    const start = Date.now();
-    for (const v of vals) {
-      promises.push(asyncFn(v));
+  afterEach(function () {
+    requestSpy.restore();
+  });
+  it('should wait and succeed', async function () {
+    const ref = Date.now();
+    function condFn (): boolean {
+      return Date.now() - ref > 200;
     }
-    promises.push(badAsyncFn());
-    let err: Error | null = null;
-    let res: number[] = [];
+    const result = await waitForCondition(condFn, {waitMs: 1000, intervalMs: 10});
+    const duration = Date.now() - ref;
+    expect(duration).to.be.above(200);
+    expect(duration).to.be.below(250);
+    expect(result).to.be.true;
+  });
+  it('should wait and fail', async function () {
+    const ref = Date.now();
+    function condFn (): boolean {
+      return Date.now() - ref > 200;
+    }
     try {
-      res = await parallel(promises);
-    } catch (e) {
-      err = e as Error;
+      await waitForCondition(condFn, {waitMs: 100, intervalMs: 10});
+      expect.fail('Should have thrown an error');
+    } catch (err: any) {
+      expect(err.message).to.match(/Condition unmet/);
     }
-    expect(Date.now() - start).to.be.at.least(19);
-    expect(Date.now() - start).to.be.below(49);
-    expect(err).to.exist;
-    expect(res).to.eql([]);
   });
-
-  describe('waitForCondition', function () {
-    let requestSpy: sinon.SinonSpy;
-    beforeEach(function () {
-      requestSpy = sinon.spy(B, 'delay');
-    });
-    afterEach(function () {
-      requestSpy.restore();
-    });
-    it('should wait and succeed', async function () {
-      const ref = Date.now();
-      function condFn (): boolean {
-        return Date.now() - ref > 200;
-      }
-      const result = await waitForCondition(condFn, {waitMs: 1000, intervalMs: 10});
-      const duration = Date.now() - ref;
-      expect(duration).to.be.above(200);
-      expect(duration).to.be.below(250);
-      expect(result).to.be.true;
-    });
-    it('should wait and fail', async function () {
-      const ref = Date.now();
-      function condFn (): boolean {
-        return Date.now() - ref > 200;
-      }
-      try {
-        await waitForCondition(condFn, {waitMs: 100, intervalMs: 10});
-        expect.fail('Should have thrown an error');
-      } catch (err: any) {
-        expect(err.message).to.match(/Condition unmet/);
-      }
-    });
-    it('should not exceed implicit wait timeout', async function () {
-      const ref = Date.now();
-      function condFn (): boolean {
-        return Date.now() - ref > 15;
-      }
-      await (waitForCondition(condFn, {waitMs: 20, intervalMs: 10}));
-      const getLastCall = requestSpy.getCall(1);
-      expect(getLastCall.args[0]).to.be.at.most(10);
-    });
+  it('should not exceed implicit wait timeout', async function () {
+    const ref = Date.now();
+    function condFn (): boolean {
+      return Date.now() - ref > 15;
+    }
+    await (waitForCondition(condFn, {waitMs: 20, intervalMs: 10}));
+    const getLastCall = requestSpy.getCall(1);
+    expect(getLastCall.args[0]).to.be.at.most(10);
   });
 });
 

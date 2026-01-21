@@ -106,17 +106,6 @@ export async function retryInterval<T = any>(
   return await retry(times, wrapped);
 }
 
-export const parallel = B.all;
-
-/**
- * Fire and forget async function execution
- * @param fn - The function to execute asynchronously
- * @param args - Arguments to pass to the function
- */
-export function asyncify(fn: (...args: any[]) => any | Promise<any>, ...args: any[]): void {
-  B.resolve(fn(...args)).done();
-}
-
 /**
  * Similar to `Array.prototype.map`; runs in serial or parallel
  * @param coll - The collection to map over
@@ -129,7 +118,7 @@ export async function asyncmap<T, R>(
   runInParallel = true,
 ): Promise<R[]> {
   if (runInParallel) {
-    return parallel(coll.map(mapper));
+    return Promise.all(coll.map(mapper));
   }
 
   const newColl: R[] = [];
@@ -152,7 +141,7 @@ export async function asyncfilter<T>(
 ): Promise<T[]> {
   const newColl: T[] = [];
   if (runInParallel) {
-    const bools = await parallel(coll.map(filter));
+    const bools = await Promise.all(coll.map(filter));
     for (let i = 0; i < coll.length; i++) {
       if (bools[i]) {
         newColl.push(coll[i]);
