@@ -174,10 +174,11 @@ export async function waitForCondition<T>(
   condFn: () => Promise<T> | T,
   options: WaitForConditionOptions = {},
 ): Promise<T> {
-  const opts: WaitForConditionOptions & {waitMs: number; intervalMs: number} = Object.assign(
-    {waitMs: 5000, intervalMs: 500},
-    options,
-  );
+  const opts: WaitForConditionOptions & {waitMs: number; intervalMs: number} = {
+    ...options,
+    waitMs: typeof options.waitMs === 'number' ? options.waitMs : 5000,
+    intervalMs: typeof options.intervalMs === 'number' ? options.intervalMs : 500,
+  };
   const debug = opts.logger ? opts.logger.debug.bind(opts.logger) : () => undefined;
   const error = opts.error;
   const begunAt = Date.now();
