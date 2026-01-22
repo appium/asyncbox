@@ -1,4 +1,3 @@
-import _ from 'lodash';
 import type {LongSleepOptions, WaitForConditionOptions} from './types.js';
 
 const LONG_SLEEP_THRESHOLD = 5000; // anything over 5000ms will turn into a spin
@@ -39,7 +38,7 @@ export async function longSleep(
     const post = Date.now();
     timeLeft = endAt - post;
     elapsedMs = elapsedMs + (post - pre);
-    if (_.isFunction(progressCb)) {
+    if (typeof progressCb === 'function') {
       progressCb({elapsedMs, timeLeft, progress: elapsedMs / ms});
     }
   } while (timeLeft > 0);
@@ -175,11 +174,11 @@ export async function waitForCondition<T>(
   condFn: () => Promise<T> | T,
   options: WaitForConditionOptions = {},
 ): Promise<T> {
-  const opts: WaitForConditionOptions & {waitMs: number; intervalMs: number} = _.defaults(options, {
-    waitMs: 5000,
-    intervalMs: 500,
-  });
-  const debug = opts.logger ? opts.logger.debug.bind(opts.logger) : _.noop;
+  const opts: WaitForConditionOptions & {waitMs: number; intervalMs: number} = Object.assign(
+    {waitMs: 5000, intervalMs: 500},
+    options,
+  );
+  const debug = opts.logger ? opts.logger.debug.bind(opts.logger) : () => undefined;
   const error = opts.error;
   const begunAt = Date.now();
   const endAt = begunAt + opts.waitMs;
@@ -198,7 +197,7 @@ export async function waitForCondition<T>(
     }
     // if there is an error option, it is either a string message or an error itself
     if (error) {
-      throw _.isString(error) ? new Error(error) : error;
+      throw typeof error === 'string' ? new Error(error) : error;
     }
     throw new Error(`Condition unmet after ${waited} ms. Timing out.`);
   };
