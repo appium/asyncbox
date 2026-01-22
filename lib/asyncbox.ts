@@ -1,4 +1,3 @@
-import B from 'bluebird';
 import _ from 'lodash';
 import type {LongSleepOptions, WaitForConditionOptions} from './types.js';
 
@@ -9,7 +8,7 @@ const LONG_SLEEP_THRESHOLD = 5000; // anything over 5000ms will turn into a spin
  * @param ms - The number of milliseconds to wait
  */
 export async function sleep(ms: number): Promise<void> {
-  return await B.delay(ms);
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 /**
@@ -194,7 +193,7 @@ export async function waitForCondition<T>(
     const remainingTime = endAt - now;
     if (now < endAt) {
       debug(`Waited for ${waited} ms so far`);
-      await B.delay(Math.min(opts.intervalMs, remainingTime));
+      await sleep(Math.min(opts.intervalMs, remainingTime));
       return await spin();
     }
     // if there is an error option, it is either a string message or an error itself
