@@ -1,3 +1,9 @@
+## [6.0.1](https://github.com/appium/asyncbox/compare/v6.0.0...v6.0.1) (2026-01-22)
+
+### Miscellaneous Chores
+
+* drop bluebird and lodash ([#57](https://github.com/appium/asyncbox/issues/57)) ([c25537b](https://github.com/appium/asyncbox/commit/c25537bba50970a1258d24f4a1efe704b90b21d5))
+
 ## [6.0.0](https://github.com/appium/asyncbox/compare/v5.0.0...v6.0.0) (2026-01-21)
 
 ### ⚠ BREAKING CHANGES
