@@ -91,16 +91,26 @@ Then in your async functions, you can do:
 ```js
 const items = [1, 2, 3, 4];
 const slowSquare = async (n) => { await sleep(5); return n * 2; };
-let newItems = await asyncmap(items, async (i) => { return await slowSquare(i); });
+let newItems = await asyncmap(items, slowSquare);
 console.log(newItems);  // [1, 4, 9, 16];
 
 const slowEven = async (n) => { await sleep(5); return n % 2 === 0; };
-newItems = await asyncfilter(items, async (i) => { return await slowEven(i); });
+newItems = await asyncfilter(items, slowEven);
 console.log(newItems); // [2, 4];
 ```
 
-By default, `asyncmap` and `asyncfilter` run their operations in parallel; you
-can pass `false` as a third argument to make sure it happens serially.
+By default, `asyncmap` and `asyncfilter` run their operations in parallel, but you
+can set the third argument to `false` to enforce sequential execution, or set a custom
+concurrency pool limit using `{concurrency: <number>}`:
+
+```js
+const items = [1, 2, 3, 4];
+const slowSquare = async (n) => { await sleep(5); return n * 2; };
+// this will run sequentially (~20ms)
+const newItemsSeq = await asyncmap(items, slowSquare, false);
+// this will handle 2 items at a time (~10ms)
+const newItemsMaxTwo = await asyncmap(items, slowSquare, {concurrency: 2});
+```
 
 ### waitForCondition
 

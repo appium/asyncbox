@@ -210,16 +210,23 @@ describe('asyncmap', function () {
     await sleep(10);
     return el * 2;
   };
-  const coll = [1, 2, 3];
+  const coll = [1, 2, 3, 4, 5];
+  const newColl = [2, 4, 6, 8, 10];
   it('should map elements one at a time', async function () {
     const start = Date.now();
-    expect(await asyncmap(coll, mapper, false)).to.eql([2, 4, 6]);
-    expect(Date.now() - start).to.be.at.least(30);
+    expect(await asyncmap(coll, mapper, false)).to.eql(newColl);
+    expect(Date.now() - start).to.be.at.least(50);
   });
   it('should map elements in parallel', async function () {
     const start = Date.now();
-    expect(await asyncmap(coll, mapper)).to.eql([2, 4, 6]);
+    expect(await asyncmap(coll, mapper)).to.eql(newColl);
     expect(Date.now() - start).to.be.at.most(20);
+  });
+  it('should map elements with concurrency', async function () {
+    const start = Date.now();
+    expect(await asyncmap(coll, mapper, {concurrency: 2})).to.eql(newColl);
+    expect(Date.now() - start).to.be.at.least(30);
+    expect(Date.now() - start).to.be.at.most(40);
   });
   it('should handle an empty array', async function () {
     expect(await asyncmap([], mapper, false)).to.eql([]);
@@ -227,32 +234,45 @@ describe('asyncmap', function () {
   it('should handle an empty array in parallel', async function () {
     expect(await asyncmap([], mapper)).to.eql([]);
   });
+  it('should raise an error for invalid concurrency option', async function () {
+    await expect(asyncmap(coll, mapper, {concurrency: 0})).to.be.rejectedWith(
+      'Concurrency option must be a positive number'
+    );
+  });
 });
 
 describe('asyncfilter', function () {
   const filter = async function (el: number): Promise<boolean> {
-    await sleep(5);
+    await sleep(10);
     return el % 2 === 0;
   };
   const coll = [1, 2, 3, 4, 5];
+  const newColl = [2, 4];
   it('should filter elements one at a time', async function () {
     const start = Date.now();
-    expect(await asyncfilter(coll, filter, false)).to.eql([2, 4]);
-    expect(Date.now() - start).to.be.at.least(19);
+    expect(await asyncfilter(coll, filter, false)).to.eql(newColl);
+    expect(Date.now() - start).to.be.at.least(50);
   });
   it('should filter elements in parallel', async function () {
     const start = Date.now();
-    expect(await asyncfilter(coll, filter)).to.eql([2, 4]);
-    expect(Date.now() - start).to.be.below(9);
+    expect(await asyncfilter(coll, filter)).to.eql(newColl);
+    expect(Date.now() - start).to.be.at.most(20);
+  });
+  it('should filter elements with concurrency', async function () {
+    const start = Date.now();
+    expect(await asyncfilter(coll, filter, {concurrency: 2})).to.eql(newColl);
+    expect(Date.now() - start).to.be.at.least(30);
+    expect(Date.now() - start).to.be.at.most(40);
   });
   it('should handle an empty array', async function () {
-    const start = Date.now();
     expect(await asyncfilter([], filter, false)).to.eql([]);
-    expect(Date.now() - start).to.be.below(9);
   });
   it('should handle an empty array in parallel', async function () {
-    const start = Date.now();
     expect(await asyncfilter([], filter)).to.eql([]);
-    expect(Date.now() - start).to.be.below(9);
+  });
+  it('should raise an error for invalid concurrency option', async function () {
+    await expect(asyncfilter(coll, filter, {concurrency: 0})).to.be.rejectedWith(
+      'Concurrency option must be a positive number'
+    );
   });
 });

@@ -1,4 +1,4 @@
-import type {LongSleepOptions, WaitForConditionOptions} from './types.js';
+import type {LongSleepOptions, MapFilterOptions, WaitForConditionOptions} from './types.js';
 
 const LONG_SLEEP_THRESHOLD = 5000; // anything over 5000ms will turn into a spin
 
@@ -105,52 +105,91 @@ export async function retryInterval<T = any>(
 }
 
 /**
- * Similar to `Array.prototype.map`; runs in serial or parallel
+ * Similar to `Array.prototype.map`; runs in parallel, serial, or with custom concurrency pool
  * @param coll - The collection to map over
  * @param mapper - The function to apply to each element
- * @param runInParallel - Whether to run operations in parallel (default: true)
+ * @param options - Options for controlling parallelism (default: true - fully parallel)
  */
 export async function asyncmap<T, R>(
   coll: T[],
   mapper: (value: T) => R | Promise<R>,
-  runInParallel = true,
+  options: MapFilterOptions = true,
 ): Promise<R[]> {
-  if (runInParallel) {
+  if (options === true) {
     return Promise.all(coll.map(mapper));
   }
-
   const newColl: R[] = [];
-  for (const item of coll) {
-    newColl.push(await mapper(item));
+  if (options === false) {
+    for (const item of coll) {
+      newColl.push(await mapper(item));
+    }
+  } else {
+    const concurrency = options.concurrency;
+    if (concurrency < 1) {
+      throw new Error('Concurrency option must be a positive number');
+    }
+    let index = 0;
+    const workers: Promise<void>[] = [];
+    const worker = async (): Promise<void> => {
+      while (index < coll.length) {
+        const currentIndex = index;
+        index++;
+        newColl[currentIndex] = await mapper(coll[currentIndex]);
+      }
+    };
+    for (let i = 0; i < concurrency; i++) {
+      workers.push(worker());
+    }
+    await Promise.all(workers);
   }
   return newColl;
 }
 
 /**
- * Similar to `Array.prototype.filter`
+ * Similar to `Array.prototype.filter`; runs in parallel, serial, or with custom concurrency pool
  * @param coll - The collection to filter
  * @param filter - The function to test each element
- * @param runInParallel - Whether to run operations in parallel (default: true)
+ * @param options - Options for controlling parallelism (default: true - fully parallel)
  */
 export async function asyncfilter<T>(
   coll: T[],
   filter: (value: T) => boolean | Promise<boolean>,
-  runInParallel = true,
+  options: MapFilterOptions = true,
 ): Promise<T[]> {
   const newColl: T[] = [];
-  if (runInParallel) {
+  if (options === true) {
     const bools = await Promise.all(coll.map(filter));
     for (let i = 0; i < coll.length; i++) {
       if (bools[i]) {
         newColl.push(coll[i]);
       }
     }
-  } else {
+  } else if (options === false) {
     for (const item of coll) {
       if (await filter(item)) {
         newColl.push(item);
       }
     }
+  } else {
+    const concurrency = options.concurrency;
+    if (concurrency < 1) {
+      throw new Error('Concurrency option must be a positive number');
+    }
+    let index = 0;
+    const workers: Promise<void>[] = [];
+    const worker = async (): Promise<void> => {
+      while (index < coll.length) {
+        const currentIndex = index;
+        index++;
+        if (await filter(coll[currentIndex])) {
+          newColl.push(coll[currentIndex]);
+        }
+      }
+    };
+    for (let i = 0; i < concurrency; i++) {
+      workers.push(worker());
+    }
+    await Promise.all(workers);
   }
   return newColl;
 }
