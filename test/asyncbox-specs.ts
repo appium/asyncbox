@@ -234,6 +234,12 @@ describe('asyncmap', function () {
   it('should handle an empty array in parallel', async function () {
     expect(await asyncmap([], mapper)).to.eql([]);
   });
+  it('should raise an error if options is null', async function () {
+    // @ts-expect-error - testing invalid inputs
+    await expect(asyncmap(coll, mapper, null)).to.be.rejectedWith(
+      'Options cannot be null'
+    );
+  });
 });
 
 describe('asyncfilter', function () {
@@ -264,5 +270,11 @@ describe('asyncfilter', function () {
   });
   it('should handle an empty array in parallel', async function () {
     expect(await asyncfilter([], filter)).to.eql([]);
+  });
+  it('should raise an error if options is null', async function () {
+    // @ts-expect-error - testing invalid inputs
+    await expect(asyncfilter(coll, filter, null)).to.be.rejectedWith(
+      'Options cannot be null'
+    );
   });
 });

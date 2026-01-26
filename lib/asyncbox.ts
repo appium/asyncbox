@@ -116,6 +116,9 @@ export async function asyncmap<T, R>(
   mapper: (value: T) => PromiseLike<R>,
   options: MapFilterOptions = true,
 ): Promise<R[]> {
+  if (options === null) {
+    throw new Error('Options cannot be null');
+  }
   if (options === false) {
     return coll.reduce<Promise<R[]>>(
       async (acc, item) => [...(await acc), await mapper(item)],
@@ -138,6 +141,9 @@ export async function asyncfilter<T>(
   filter: (value: T) => PromiseLike<boolean>,
   options: MapFilterOptions = true,
 ): Promise<T[]> {
+  if (options === null) {
+    throw new Error('Options cannot be null');
+  }
   if (options === false) {
     return coll.reduce<Promise<T[]>>(async (accP, item) => {
       const acc = await accP;
@@ -146,17 +152,16 @@ export async function asyncfilter<T>(
       }
       return acc;
     }, Promise.resolve([]));
-  } else {
-    const adjustedFilter =
-      options === true ? filter : limitFunction(filter, {concurrency: options.concurrency});
-    const bools = await Promise.all(coll.map(adjustedFilter));
-    return coll.reduce<T[]>((acc, item, i) => {
-      if (bools[i]) {
-        acc.push(item);
-      }
-      return acc;
-    }, []);
   }
+  const adjustedFilter =
+    options === true ? filter : limitFunction(filter, {concurrency: options.concurrency});
+  const bools = await Promise.all(coll.map(adjustedFilter));
+  return coll.reduce<T[]>((acc, item, i) => {
+    if (bools[i]) {
+      acc.push(item);
+    }
+    return acc;
+  }, []);
 }
 
 /**
