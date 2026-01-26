@@ -1,4 +1,4 @@
-import pLimit from 'p-limit';
+import {limitFunction} from 'p-limit';
 import type {LongSleepOptions, MapFilterOptions, WaitForConditionOptions} from './types.js';
 
 const LONG_SLEEP_THRESHOLD = 5000; // anything over 5000ms will turn into a spin
@@ -113,21 +113,19 @@ export async function retryInterval<T = any>(
  */
 export async function asyncmap<T, R>(
   coll: T[],
-  mapper: (value: T) => R | Promise<R>,
+  mapper: (value: T) => PromiseLike<R>,
   options: MapFilterOptions = true,
 ): Promise<R[]> {
-  if (options === true) {
-    return Promise.all(coll.map(mapper));
-  }
   if (options === false) {
     const newColl: R[] = [];
     for (const item of coll) {
       newColl.push(await mapper(item));
     }
     return newColl;
-  } else {
-    return await pLimit(options.concurrency).map(coll, mapper);
   }
+  const adjustedMapper =
+    options === true ? mapper : limitFunction(mapper, {concurrency: options.concurrency});
+  return Promise.all(coll.map(adjustedMapper));
 }
 
 /**
@@ -138,25 +136,20 @@ export async function asyncmap<T, R>(
  */
 export async function asyncfilter<T>(
   coll: T[],
-  filter: (value: T) => boolean | Promise<boolean>,
+  filter: (value: T) => PromiseLike<boolean>,
   options: MapFilterOptions = true,
 ): Promise<T[]> {
   const newColl: T[] = [];
-  if (options === true) {
-    const bools = await Promise.all(coll.map(filter));
-    for (let i = 0; i < coll.length; i++) {
-      if (bools[i]) {
-        newColl.push(coll[i]);
-      }
-    }
-  } else if (options === false) {
+  if (options === false) {
     for (const item of coll) {
       if (await filter(item)) {
         newColl.push(item);
       }
     }
   } else {
-    const bools = await pLimit(options.concurrency).map(coll, filter);
+    const adjustedFilter =
+      options === true ? filter : limitFunction(filter, {concurrency: options.concurrency});
+    const bools = await Promise.all(coll.map(adjustedFilter));
     for (let i = 0; i < coll.length; i++) {
       if (bools[i]) {
         newColl.push(coll[i]);
