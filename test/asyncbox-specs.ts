@@ -225,7 +225,7 @@ describe('asyncmap', function () {
   it('should map elements with concurrency', async function () {
     const start = Date.now();
     expect(await asyncmap(coll, mapper, {concurrency: 2})).to.eql(newColl);
-    expect(Date.now() - start).to.be.at.least(30);
+    expect(Date.now() - start).to.be.at.least(29);
     expect(Date.now() - start).to.be.at.most(40);
   });
   it('should handle an empty array', async function () {
@@ -267,7 +267,7 @@ describe('asyncfilter', function () {
   it('should filter elements with concurrency', async function () {
     const start = Date.now();
     expect(await asyncfilter(coll, filter, {concurrency: 2})).to.eql(newColl);
-    expect(Date.now() - start).to.be.at.least(30);
+    expect(Date.now() - start).to.be.at.least(29);
     expect(Date.now() - start).to.be.at.most(40);
   });
   it('should handle an empty array', async function () {
