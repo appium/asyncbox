@@ -1,3 +1,4 @@
+import pLimit from 'p-limit';
 import type {LongSleepOptions, MapFilterOptions, WaitForConditionOptions} from './types.js';
 
 const LONG_SLEEP_THRESHOLD = 5000; // anything over 5000ms will turn into a spin
@@ -118,31 +119,15 @@ export async function asyncmap<T, R>(
   if (options === true) {
     return Promise.all(coll.map(mapper));
   }
-  const newColl: R[] = [];
   if (options === false) {
+    const newColl: R[] = [];
     for (const item of coll) {
       newColl.push(await mapper(item));
     }
+    return newColl;
   } else {
-    const concurrency = options.concurrency;
-    if (!Number.isInteger(concurrency) || concurrency < 1) {
-      throw new Error('Concurrency option must be a positive integer');
-    }
-    let index = 0;
-    const workers: Promise<void>[] = [];
-    const worker = async (): Promise<void> => {
-      while (index < coll.length) {
-        const currentIndex = index;
-        index++;
-        newColl[currentIndex] = await mapper(coll[currentIndex]);
-      }
-    };
-    for (let i = 0; i < concurrency; i++) {
-      workers.push(worker());
-    }
-    await Promise.all(workers);
+    return await pLimit(options.concurrency).map(coll, mapper);
   }
-  return newColl;
 }
 
 /**
@@ -171,24 +156,7 @@ export async function asyncfilter<T>(
       }
     }
   } else {
-    const concurrency = options.concurrency;
-    if (!Number.isInteger(concurrency) || concurrency < 1) {
-      throw new Error('Concurrency option must be a positive integer');
-    }
-    let index = 0;
-    const bools: boolean[] = new Array(coll.length);
-    const workers: Promise<void>[] = [];
-    const worker = async (): Promise<void> => {
-      while (index < coll.length) {
-        const currentIndex = index;
-        index++;
-        bools[currentIndex] = await filter(coll[currentIndex]);
-      }
-    };
-    for (let i = 0; i < concurrency; i++) {
-      workers.push(worker());
-    }
-    await Promise.all(workers);
+    const bools = await pLimit(options.concurrency).map(coll, filter);
     for (let i = 0; i < coll.length; i++) {
       if (bools[i]) {
         newColl.push(coll[i]);

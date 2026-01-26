@@ -241,7 +241,7 @@ describe('asyncmap', function () {
   ].forEach(({desc, val}) => {
     it(`should raise an error for ${desc} concurrency option value`, async function () {
       await expect(asyncmap(coll, mapper, {concurrency: val})).to.be.rejectedWith(
-        'Concurrency option must be a positive integer'
+        'Expected `concurrency` to be a number from 1 and up'
       );
     });
   });
@@ -283,7 +283,7 @@ describe('asyncfilter', function () {
   ].forEach(({desc, val}) => {
     it(`should raise an error for ${desc} concurrency option value`, async function () {
       await expect(asyncfilter(coll, filter, {concurrency: val})).to.be.rejectedWith(
-        'Concurrency option must be a positive integer'
+        'Expected `concurrency` to be a number from 1 and up'
       );
     });
   });
