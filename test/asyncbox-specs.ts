@@ -238,7 +238,7 @@ describe('asyncmap', function () {
     {desc: 'a zero', val: 0},
     {desc: 'a negative', val: -1},
     {desc: 'a non-integer', val: 2.5},
-  ].forEach(async ({desc, val}) => {
+  ].forEach(({desc, val}) => {
     it(`should raise an error for ${desc} concurrency option value`, async function () {
       await expect(asyncmap(coll, mapper, {concurrency: val})).to.be.rejectedWith(
         'Concurrency option must be a positive integer'
@@ -280,7 +280,7 @@ describe('asyncfilter', function () {
     {desc: 'a zero', val: 0},
     {desc: 'a negative', val: -1},
     {desc: 'a non-integer', val: 2.5},
-  ].forEach(async ({desc, val}) => {
+  ].forEach(({desc, val}) => {
     it(`should raise an error for ${desc} concurrency option value`, async function () {
       await expect(asyncfilter(coll, filter, {concurrency: val})).to.be.rejectedWith(
         'Concurrency option must be a positive integer'
