@@ -117,11 +117,10 @@ export async function asyncmap<T, R>(
   options: MapFilterOptions = true,
 ): Promise<R[]> {
   if (options === false) {
-    const newColl: R[] = [];
-    for (const item of coll) {
-      newColl.push(await mapper(item));
-    }
-    return newColl;
+    return coll.reduce<Promise<R[]>>(
+      async (acc, item) => [...(await acc), await mapper(item)],
+      Promise.resolve([]),
+    );
   }
   const adjustedMapper =
     options === true ? mapper : limitFunction(mapper, {concurrency: options.concurrency});
@@ -139,24 +138,25 @@ export async function asyncfilter<T>(
   filter: (value: T) => PromiseLike<boolean>,
   options: MapFilterOptions = true,
 ): Promise<T[]> {
-  const newColl: T[] = [];
   if (options === false) {
-    for (const item of coll) {
+    return coll.reduce<Promise<T[]>>(async (accP, item) => {
+      const acc = await accP;
       if (await filter(item)) {
-        newColl.push(item);
+        acc.push(item);
       }
-    }
+      return acc;
+    }, Promise.resolve([]));
   } else {
     const adjustedFilter =
       options === true ? filter : limitFunction(filter, {concurrency: options.concurrency});
     const bools = await Promise.all(coll.map(adjustedFilter));
-    for (let i = 0; i < coll.length; i++) {
+    return coll.reduce<T[]>((acc, item, i) => {
       if (bools[i]) {
-        newColl.push(coll[i]);
+        acc.push(item);
       }
-    }
+      return acc;
+    }, []);
   }
-  return newColl;
 }
 
 /**

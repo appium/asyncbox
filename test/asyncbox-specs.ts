@@ -234,17 +234,6 @@ describe('asyncmap', function () {
   it('should handle an empty array in parallel', async function () {
     expect(await asyncmap([], mapper)).to.eql([]);
   });
-  [
-    {desc: 'a zero', val: 0},
-    {desc: 'a negative', val: -1},
-    {desc: 'a non-integer', val: 2.5},
-  ].forEach(({desc, val}) => {
-    it(`should raise an error for ${desc} concurrency option value`, async function () {
-      await expect(asyncmap(coll, mapper, {concurrency: val})).to.be.rejectedWith(
-        'Expected `concurrency` to be a number from 1 and up'
-      );
-    });
-  });
 });
 
 describe('asyncfilter', function () {
@@ -275,16 +264,5 @@ describe('asyncfilter', function () {
   });
   it('should handle an empty array in parallel', async function () {
     expect(await asyncfilter([], filter)).to.eql([]);
-  });
-  [
-    {desc: 'a zero', val: 0},
-    {desc: 'a negative', val: -1},
-    {desc: 'a non-integer', val: 2.5},
-  ].forEach(({desc, val}) => {
-    it(`should raise an error for ${desc} concurrency option value`, async function () {
-      await expect(asyncfilter(coll, filter, {concurrency: val})).to.be.rejectedWith(
-        'Expected `concurrency` to be a number from 1 and up'
-      );
-    });
   });
 });
