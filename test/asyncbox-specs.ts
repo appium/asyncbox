@@ -234,10 +234,16 @@ describe('asyncmap', function () {
   it('should handle an empty array in parallel', async function () {
     expect(await asyncmap([], mapper)).to.eql([]);
   });
-  it('should raise an error for invalid concurrency option', async function () {
-    await expect(asyncmap(coll, mapper, {concurrency: 0})).to.be.rejectedWith(
-      'Concurrency option must be a positive number'
-    );
+  [
+    {desc: 'a zero', val: 0},
+    {desc: 'a negative', val: -1},
+    {desc: 'a non-integer', val: 2.5},
+  ].forEach(async ({desc, val}) => {
+    it(`should raise an error for ${desc} concurrency option value`, async function () {
+      await expect(asyncmap(coll, mapper, {concurrency: val})).to.be.rejectedWith(
+        'Concurrency option must be a positive integer'
+      );
+    });
   });
 });
 
@@ -270,9 +276,15 @@ describe('asyncfilter', function () {
   it('should handle an empty array in parallel', async function () {
     expect(await asyncfilter([], filter)).to.eql([]);
   });
-  it('should raise an error for invalid concurrency option', async function () {
-    await expect(asyncfilter(coll, filter, {concurrency: 0})).to.be.rejectedWith(
-      'Concurrency option must be a positive number'
-    );
+  [
+    {desc: 'a zero', val: 0},
+    {desc: 'a negative', val: -1},
+    {desc: 'a non-integer', val: 2.5},
+  ].forEach(async ({desc, val}) => {
+    it(`should raise an error for ${desc} concurrency option value`, async function () {
+      await expect(asyncfilter(coll, filter, {concurrency: val})).to.be.rejectedWith(
+        'Concurrency option must be a positive integer'
+      );
+    });
   });
 });

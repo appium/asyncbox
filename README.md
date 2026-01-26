@@ -90,7 +90,7 @@ Then in your async functions, you can do:
 
 ```js
 const items = [1, 2, 3, 4];
-const slowSquare = async (n) => { await sleep(5); return n * 2; };
+const slowSquare = async (n) => { await sleep(5); return n * n; };
 let newItems = await asyncmap(items, slowSquare);
 console.log(newItems);  // [1, 4, 9, 16];
 
@@ -105,7 +105,7 @@ concurrency pool limit using `{concurrency: <number>}`:
 
 ```js
 const items = [1, 2, 3, 4];
-const slowSquare = async (n) => { await sleep(5); return n * 2; };
+const slowSquare = async (n) => { await sleep(5); return n * n; };
 // this will run sequentially (~20ms)
 const newItemsSeq = await asyncmap(items, slowSquare, false);
 // this will handle 2 items at a time (~10ms)

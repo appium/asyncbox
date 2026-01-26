@@ -125,8 +125,8 @@ export async function asyncmap<T, R>(
     }
   } else {
     const concurrency = options.concurrency;
-    if (concurrency < 1) {
-      throw new Error('Concurrency option must be a positive number');
+    if (!Number.isInteger(concurrency) || concurrency < 1) {
+      throw new Error('Concurrency option must be a positive integer');
     }
     let index = 0;
     const workers: Promise<void>[] = [];
@@ -172,24 +172,28 @@ export async function asyncfilter<T>(
     }
   } else {
     const concurrency = options.concurrency;
-    if (concurrency < 1) {
-      throw new Error('Concurrency option must be a positive number');
+    if (!Number.isInteger(concurrency) || concurrency < 1) {
+      throw new Error('Concurrency option must be a positive integer');
     }
     let index = 0;
+    const bools: boolean[] = new Array(coll.length);
     const workers: Promise<void>[] = [];
     const worker = async (): Promise<void> => {
       while (index < coll.length) {
         const currentIndex = index;
         index++;
-        if (await filter(coll[currentIndex])) {
-          newColl.push(coll[currentIndex]);
-        }
+        bools[currentIndex] = await filter(coll[currentIndex]);
       }
     };
     for (let i = 0; i < concurrency; i++) {
       workers.push(worker());
     }
     await Promise.all(workers);
+    for (let i = 0; i < coll.length; i++) {
+      if (bools[i]) {
+        newColl.push(coll[i]);
+      }
+    }
   }
   return newColl;
 }
