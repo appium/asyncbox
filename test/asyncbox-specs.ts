@@ -234,6 +234,11 @@ describe('asyncmap', function () {
   it('should handle an empty array in parallel', async function () {
     expect(await asyncmap([], mapper)).to.eql([]);
   });
+  it('should work for a sync mapper function', async function () {
+    const syncmapper = (el: number): number => el * 2;
+    expect(await asyncmap(coll, syncmapper, false)).to.eql(newColl);
+    expect(await asyncmap(coll, syncmapper)).to.eql(newColl);
+  });
   it('should raise an error if options is null', async function () {
     // @ts-expect-error - testing invalid inputs
     await expect(asyncmap(coll, mapper, null)).to.be.rejectedWith(
@@ -270,6 +275,11 @@ describe('asyncfilter', function () {
   });
   it('should handle an empty array in parallel', async function () {
     expect(await asyncfilter([], filter)).to.eql([]);
+  });
+  it('should work for a sync filter function', async function () {
+    const syncfilter = (el: number): boolean => el % 2 === 0;
+    expect(await asyncfilter(coll, syncfilter, false)).to.eql(newColl);
+    expect(await asyncfilter(coll, syncfilter)).to.eql(newColl);
   });
   it('should raise an error if options is null', async function () {
     // @ts-expect-error - testing invalid inputs

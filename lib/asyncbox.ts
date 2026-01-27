@@ -113,20 +113,22 @@ export async function retryInterval<T = any>(
  */
 export async function asyncmap<T, R>(
   coll: T[],
-  mapper: (value: T) => PromiseLike<R>,
+  mapper: (value: T) => R | Promise<R>,
   options: MapFilterOptions = true,
 ): Promise<R[]> {
   if (options === null) {
     throw new Error('Options cannot be null');
   }
+  // limitFunction requires the mapper to always return a promise
+  const mapperAsync = async (value: T): Promise<R> => mapper(value);
   if (options === false) {
     return coll.reduce<Promise<R[]>>(
-      async (acc, item) => [...(await acc), await mapper(item)],
+      async (acc, item) => [...(await acc), await mapperAsync(item)],
       Promise.resolve([]),
     );
   }
   const adjustedMapper =
-    options === true ? mapper : limitFunction(mapper, {concurrency: options.concurrency});
+    options === true ? mapperAsync : limitFunction(mapperAsync, {concurrency: options.concurrency});
   return Promise.all(coll.map(adjustedMapper));
 }
 
@@ -138,23 +140,25 @@ export async function asyncmap<T, R>(
  */
 export async function asyncfilter<T>(
   coll: T[],
-  filter: (value: T) => PromiseLike<boolean>,
+  filter: (value: T) => boolean | Promise<boolean>,
   options: MapFilterOptions = true,
 ): Promise<T[]> {
   if (options === null) {
     throw new Error('Options cannot be null');
   }
+  // limitFunction requires the filter to always return a promise
+  const filterAsync = async (value: T): Promise<boolean> => filter(value);
   if (options === false) {
     return coll.reduce<Promise<T[]>>(async (accP, item) => {
       const acc = await accP;
-      if (await filter(item)) {
+      if (await filterAsync(item)) {
         acc.push(item);
       }
       return acc;
     }, Promise.resolve([]));
   }
   const adjustedFilter =
-    options === true ? filter : limitFunction(filter, {concurrency: options.concurrency});
+    options === true ? filterAsync : limitFunction(filterAsync, {concurrency: options.concurrency});
   const bools = await Promise.all(coll.map(adjustedFilter));
   return coll.reduce<T[]>((acc, item, i) => {
     if (bools[i]) {
