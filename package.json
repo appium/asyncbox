@@ -49,7 +49,7 @@
     "p-limit": "^7.2.0"
   },
   "devDependencies": {
-    "@appium/eslint-config-appium-ts": "^2.0.5",
+    "@appium/eslint-config-appium-ts": "^3.0.0",
     "@appium/tsconfig": "^1.0.0",
     "@semantic-release/changelog": "^6.0.1",
     "@semantic-release/git": "^10.0.1",
