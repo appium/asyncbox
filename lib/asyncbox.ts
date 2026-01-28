@@ -1,4 +1,5 @@
-import type {LongSleepOptions, WaitForConditionOptions} from './types.js';
+import {limitFunction} from 'p-limit';
+import type {LongSleepOptions, MapFilterOptions, WaitForConditionOptions} from './types.js';
 
 const LONG_SLEEP_THRESHOLD = 5000; // anything over 5000ms will turn into a spin
 
@@ -105,54 +106,66 @@ export async function retryInterval<T = any>(
 }
 
 /**
- * Similar to `Array.prototype.map`; runs in serial or parallel
+ * Similar to `Array.prototype.map`; runs in parallel, serial, or with custom concurrency pool
  * @param coll - The collection to map over
  * @param mapper - The function to apply to each element
- * @param runInParallel - Whether to run operations in parallel (default: true)
+ * @param options - Options for controlling parallelism (default: true - fully parallel)
  */
 export async function asyncmap<T, R>(
   coll: T[],
   mapper: (value: T) => R | Promise<R>,
-  runInParallel = true,
+  options: MapFilterOptions = true,
 ): Promise<R[]> {
-  if (runInParallel) {
-    return Promise.all(coll.map(mapper));
+  if (options === null) {
+    throw new Error('Options cannot be null');
   }
-
-  const newColl: R[] = [];
-  for (const item of coll) {
-    newColl.push(await mapper(item));
+  // limitFunction requires the mapper to always return a promise
+  const mapperAsync = async (value: T): Promise<R> => mapper(value);
+  if (options === false) {
+    return coll.reduce<Promise<R[]>>(
+      async (acc, item) => [...(await acc), await mapperAsync(item)],
+      Promise.resolve([]),
+    );
   }
-  return newColl;
+  const adjustedMapper =
+    options === true ? mapperAsync : limitFunction(mapperAsync, {concurrency: options.concurrency});
+  return Promise.all(coll.map(adjustedMapper));
 }
 
 /**
- * Similar to `Array.prototype.filter`
+ * Similar to `Array.prototype.filter`; runs in parallel, serial, or with custom concurrency pool
  * @param coll - The collection to filter
  * @param filter - The function to test each element
- * @param runInParallel - Whether to run operations in parallel (default: true)
+ * @param options - Options for controlling parallelism (default: true - fully parallel)
  */
 export async function asyncfilter<T>(
   coll: T[],
   filter: (value: T) => boolean | Promise<boolean>,
-  runInParallel = true,
+  options: MapFilterOptions = true,
 ): Promise<T[]> {
-  const newColl: T[] = [];
-  if (runInParallel) {
-    const bools = await Promise.all(coll.map(filter));
-    for (let i = 0; i < coll.length; i++) {
-      if (bools[i]) {
-        newColl.push(coll[i]);
-      }
-    }
-  } else {
-    for (const item of coll) {
-      if (await filter(item)) {
-        newColl.push(item);
-      }
-    }
+  if (options === null) {
+    throw new Error('Options cannot be null');
   }
-  return newColl;
+  // limitFunction requires the filter to always return a promise
+  const filterAsync = async (value: T): Promise<boolean> => filter(value);
+  if (options === false) {
+    return coll.reduce<Promise<T[]>>(async (accP, item) => {
+      const acc = await accP;
+      if (await filterAsync(item)) {
+        acc.push(item);
+      }
+      return acc;
+    }, Promise.resolve([]));
+  }
+  const adjustedFilter =
+    options === true ? filterAsync : limitFunction(filterAsync, {concurrency: options.concurrency});
+  const bools = await Promise.all(coll.map(adjustedFilter));
+  return coll.reduce<T[]>((acc, item, i) => {
+    if (bools[i]) {
+      acc.push(item);
+    }
+    return acc;
+  }, []);
 }
 
 /**

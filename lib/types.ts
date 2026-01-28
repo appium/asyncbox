@@ -32,6 +32,11 @@ export interface LongSleepOptions {
 }
 
 /**
+ * Options for {@link asyncmap} and {@link asyncfilter}
+ */
+export type MapFilterOptions = boolean | {concurrency: number};
+
+/**
  * Options for {@link waitForCondition}
  */
 export interface WaitForConditionOptions {
