@@ -41,7 +41,15 @@ describe('longSleep', function () {
     let curElapsed = 0;
     let curTimeLeft = 10000;
     let curProgress = 0;
-    const progressCb = function ({elapsedMs, timeLeft, progress}: {elapsedMs: number, timeLeft: number, progress: number}) {
+    const progressCb = function ({
+      elapsedMs,
+      timeLeft,
+      progress,
+    }: {
+      elapsedMs: number;
+      timeLeft: number;
+      progress: number;
+    }) {
       expect(elapsedMs).to.be.above(curElapsed);
       expect(timeLeft).to.be.below(curTimeLeft);
       expect(progress).to.be.above(curProgress);
@@ -173,7 +181,7 @@ describe('retry', function () {
 describe('waitForCondition', function () {
   it('should wait and succeed', async function () {
     const ref = Date.now();
-    function condFn (): boolean {
+    function condFn(): boolean {
       return Date.now() - ref > 200;
     }
     const result = await waitForCondition(condFn, {waitMs: 1000, intervalMs: 10});
@@ -184,7 +192,7 @@ describe('waitForCondition', function () {
   });
   it('should wait and fail', async function () {
     const ref = Date.now();
-    function condFn (): boolean {
+    function condFn(): boolean {
       return Date.now() - ref > 200;
     }
     try {
@@ -196,7 +204,7 @@ describe('waitForCondition', function () {
   });
   it('should reduce interval to not exceed timeout', async function () {
     const ref = Date.now();
-    function condFn (): boolean {
+    function condFn(): boolean {
       return Date.now() - ref > 25;
     }
     await waitForCondition(condFn, {waitMs: 30, intervalMs: 20});
@@ -241,9 +249,7 @@ describe('asyncmap', function () {
   });
   it('should raise an error if options is null', async function () {
     // @ts-expect-error - testing invalid inputs
-    await expect(asyncmap(coll, mapper, null)).to.be.rejectedWith(
-      'Options cannot be null'
-    );
+    await expect(asyncmap(coll, mapper, null)).to.be.rejectedWith('Options cannot be null');
   });
 });
 
@@ -283,8 +289,6 @@ describe('asyncfilter', function () {
   });
   it('should raise an error if options is null', async function () {
     // @ts-expect-error - testing invalid inputs
-    await expect(asyncfilter(coll, filter, null)).to.be.rejectedWith(
-      'Options cannot be null'
-    );
+    await expect(asyncfilter(coll, filter, null)).to.be.rejectedWith('Options cannot be null');
   });
 });
