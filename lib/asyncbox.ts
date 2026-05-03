@@ -31,18 +31,8 @@ export async function sleep(ms: number): Promise<void> {
  * @param timeoutMs - Maximum time in milliseconds before rejecting if `promise` has not settled.
  * @param messageOrError - Optional override for the timeout rejection: custom {@link TimeoutError}
  * message when the string is non-empty, or an existing `Error` to reject with verbatim.
+ * Omitted, `undefined`, or other falsy non-error values use the default timeout message (includes `timeoutMs`).
  */
-export async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T>;
-export async function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-  message: string,
-): Promise<T>;
-export async function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-  error: Error,
-): Promise<T>;
 export async function withTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number,

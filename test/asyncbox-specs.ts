@@ -23,22 +23,21 @@ describe('sleep', function () {
 });
 
 describe('withTimeout', function () {
+  function neverSettles<T>(): Promise<T> {
+    return new Promise(() => {});
+  }
+
   it('should resolve when the promise settles before the deadline', async function () {
     const result = await withTimeout(Promise.resolve(42), 1000);
     expect(result).to.equal(42);
   });
   it('should reject with TimeoutError when the deadline is exceeded', async function () {
-    const slow = (async () => {
-      await sleep(5000);
-      return 'late';
-    })();
-    await expect(withTimeout(slow, 30)).to.be.rejectedWith(TimeoutError);
+    await expect(withTimeout(neverSettles<string>(), 30)).to.be.rejectedWith(TimeoutError);
   });
   it('should use the default TimeoutError message when none is provided', async function () {
-    const slow = sleep(5000);
     const timeoutMs = 20;
     try {
-      await withTimeout(slow, timeoutMs);
+      await withTimeout(neverSettles<string>(), timeoutMs);
       expect.fail('expected rejection');
     } catch (err: unknown) {
       expect(err).to.be.instanceOf(TimeoutError);
@@ -46,9 +45,8 @@ describe('withTimeout', function () {
     }
   });
   it('should use a custom message on TimeoutError when provided', async function () {
-    const slow = sleep(5000);
     try {
-      await withTimeout(slow, 20, 'custom timeout');
+      await withTimeout(neverSettles<string>(), 20, 'custom timeout');
       expect.fail('expected rejection');
     } catch (err: unknown) {
       expect(err).to.be.instanceOf(TimeoutError);
@@ -63,9 +61,8 @@ describe('withTimeout', function () {
       }
     }
     const customErr = new CustomTimeout('overridden');
-    const slow = sleep(5000);
     try {
-      await withTimeout(slow, 20, customErr);
+      await withTimeout(neverSettles<string>(), 20, customErr);
       expect.fail('expected rejection');
     } catch (err: unknown) {
       expect(err).to.equal(customErr);

@@ -23,6 +23,45 @@ async function myFn () {
 };
 ```
 
+### withTimeout
+
+Race a promise against a deadline. If the promise settles first, its result is returned; if the deadline passes first, the call rejects. By default that rejection is a `TimeoutError` whose message includes how long you waited; you can pass a non-empty string for a custom `TimeoutError` message, or an `Error` instance to reject with that exact value. Omitted or other falsy third arguments (except a real `Error`) use the default timeout message.
+
+`withTimeout` only stops *waiting* on the promise: the underlying async work keeps running (there is no built-in cancellation). Aborting a `fetch`, clearing timers, or tearing down other resources is the caller’s responsibility if you need that behavior.
+
+```js
+import { withTimeout, TimeoutError } from 'asyncbox';
+
+// default: TimeoutError, message includes timeoutMs
+await withTimeout(fetch('/slow').then((r) => r.json()), 5000);
+
+// custom TimeoutError message
+await withTimeout(slowWork(), 10_000, 'slowWork exceeded 10s');
+
+// reject with a specific error you constructed (same object on timeout)
+const err = new MyAppError('upstream did not respond');
+await withTimeout(slowWork(), 5000, err);
+```
+
+Cancelling an in-flight `fetch` when the timeout wins:
+
+```js
+import { withTimeout, TimeoutError } from 'asyncbox';
+
+async function fetchJsonWithTimeout(url, timeoutMs) {
+  const controller = new AbortController();
+  const body = fetch(url, { signal: controller.signal }).then((r) => r.json());
+  try {
+    return await withTimeout(body, timeoutMs);
+  } catch (err) {
+    if (err instanceof TimeoutError) {
+      controller.abort();
+    }
+    throw err;
+  }
+}
+```
+
 ### Long Sleep
 
 Sometimes `Promise.delay` or `setTimeout` are inaccurate for large wait times. To safely wait for these long times (e.g. in the 5+ minute range), you can use `longSleep`:
