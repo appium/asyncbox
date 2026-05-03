@@ -32,10 +32,7 @@ export async function sleep(ms: number): Promise<void> {
  * @param messageOrError - Optional override for the timeout rejection: custom {@link TimeoutError}
  * message when the string is non-empty, or an existing `Error` to reject with verbatim.
  */
-export async function withTimeout<T>(
-  promise: Promise<T>,
-  timeoutMs: number,
-): Promise<T>;
+export async function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T>;
 export async function withTimeout<T>(
   promise: Promise<T>,
   timeoutMs: number,
