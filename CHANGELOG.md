@@ -1,3 +1,9 @@
+## [6.2.0](https://github.com/appium/asyncbox/compare/v6.1.0...v6.2.0) (2026-05-03)
+
+### Features
+
+* Add withTimeout helper ([#70](https://github.com/appium/asyncbox/issues/70)) ([12b4b2f](https://github.com/appium/asyncbox/commit/12b4b2fda29611945c0a52d021e8bd8db6cccb19))
+
 ## [6.1.0](https://github.com/appium/asyncbox/compare/v6.0.1...v6.1.0) (2026-01-28)
 
 ### Features
