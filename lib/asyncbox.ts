@@ -62,7 +62,7 @@ export function sleep(arg: SleepArg): CancellablePromise<void> {
       timeoutId = undefined;
     }
     if (cancelError === null) {
-      resolveFn?.();
+      resolveFn?.(undefined);
     } else {
       let err: Error;
       if (typeof cancelError === 'string' && cancelError) {
