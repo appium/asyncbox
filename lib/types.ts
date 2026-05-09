@@ -38,21 +38,21 @@ export type MapFilterOptions = boolean | {concurrency: number};
 
 /**
  * Object form of {@link sleep}'s argument: duration plus optional cancellation rejection override.
+ * Structural typing allows class instances; {@link sleep} accepts any non-array object with a finite `ms`.
  */
 export interface SleepOptions {
   /** Duration in milliseconds */
   ms: number;
   /**
-   * When {@link sleep}'s `cancel` runs: a non-empty string becomes {@link PromiseCancellation}
+   * When {@link sleep}'s `cancel` runs: a non-empty string becomes {@link PromiseCancellationError}
    * with that message; an `Error` rejects with that same instance; `null` resolves the promise
-   * instead of rejecting; omitted or other falsy values (except `null`) use the default
-   * {@link PromiseCancellation}.
+   * instead of rejecting; omitted, `undefined`, or `''` use the default {@link PromiseCancellationError}.
    */
   cancelError?: string | Error | null;
 }
 
 /**
- * Argument to {@link sleep}: either milliseconds or a plain options object (see {@link SleepOptions}).
+ * Argument to {@link sleep}: either milliseconds or an options object (see {@link SleepOptions}).
  */
 export type SleepArg = number | SleepOptions;
 

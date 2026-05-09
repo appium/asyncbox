@@ -19,16 +19,16 @@ export class TimeoutError extends Error {
 }
 
 /** Thrown when a promise is cancelled via `cancel`. */
-export class PromiseCancellation extends Error {
+export class PromiseCancellationError extends Error {
   constructor(message: string = 'Promise cancelled') {
     super(message);
-    this.name = 'PromiseCancellation';
+    this.name = 'PromiseCancellationError';
   }
 }
 
 /**
  * An async/await version of `setTimeout`. The returned promise has a `cancel()` method that clears
- * the timer and usually rejects with {@link PromiseCancellation} unless you use the object form with
+ * the timer and usually rejects with {@link PromiseCancellationError} unless you use the object form with
  * `cancelError: null` to resolve on cancel.
  *
  * @param ms - Milliseconds to wait
@@ -36,8 +36,9 @@ export class PromiseCancellation extends Error {
  */
 export function sleep(ms: number): CancellablePromise<void>;
 /**
- * Object form: `ms` plus optional `cancelError` (string, `Error`, `null` to resolve on cancel, or
- * omitted / empty string for default {@link PromiseCancellation}).
+ * Object form: `ms` plus optional `cancelError` (non-empty string or `Error`, `null` to resolve on
+ * cancel, or omitted / `undefined` / `''` for default {@link PromiseCancellationError}). Any non-array
+ * object with a finite `ms` is accepted at runtime (including class instances), matching structural typing.
  *
  * @param options - Duration and optional cancellation behavior
  * @returns A thenable you can `await`; call `.cancel()` to abort early.
@@ -65,11 +66,11 @@ export function sleep(arg: SleepArg): CancellablePromise<void> {
     } else {
       let err: Error;
       if (typeof cancelError === 'string' && cancelError) {
-        err = new PromiseCancellation(cancelError);
+        err = new PromiseCancellationError(cancelError);
       } else if (cancelError instanceof Error) {
         err = cancelError;
       } else {
-        err = new PromiseCancellation();
+        err = new PromiseCancellationError();
       }
       rejectFn?.(err);
     }
@@ -340,27 +341,24 @@ export type {
   WaitForConditionOptions,
 } from './types.js';
 
-function isPlainObject(value: unknown): value is Record<PropertyKey, unknown> {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
-    return false;
-  }
-  const proto = Object.getPrototypeOf(value);
-  return proto === Object.prototype || proto === null;
+/** Non-array object values (including class instances); excludes `null` and arrays. */
+function isSleepArgObject(value: unknown): value is Record<PropertyKey, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
 function parseSleepArg(arg: SleepArg): {ms: number; cancelError?: string | Error | null} {
   if (typeof arg === 'number') {
     if (!Number.isFinite(arg)) {
-      throw new TypeError('sleep: expected a finite number or a plain object with ms');
+      throw new TypeError('sleep: expected a finite number or an object with ms');
     }
     return {ms: arg};
   }
-  if (isPlainObject(arg)) {
+  if (isSleepArgObject(arg)) {
     const ms = arg.ms;
     if (typeof ms !== 'number' || !Number.isFinite(ms)) {
       throw new TypeError('sleep: options.ms must be a finite number');
     }
     return {ms, cancelError: arg.cancelError as string | Error | null | undefined};
   }
-  throw new TypeError('sleep: expected a finite number or a plain object with ms');
+  throw new TypeError('sleep: expected a finite number or an object with ms');
 }
