@@ -54,6 +54,8 @@
     "@appium/tsconfig": "^1.0.0",
     "@semantic-release/changelog": "^6.0.1",
     "@semantic-release/git": "^10.0.1",
+    "@types/chai": "^5.2.3",
+    "@types/chai-as-promised": "^8.0.2",
     "@types/mocha": "^10.0.10",
     "@types/node": "^25.0.3",
     "chai": "^6.2.1",

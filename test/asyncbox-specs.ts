@@ -10,6 +10,8 @@ import {
   waitForCondition,
   withTimeout,
   TimeoutError,
+  PromiseCancellationError,
+  type SleepOptions,
 } from '../lib/asyncbox.js';
 
 use(chaiAsPromised);
@@ -19,6 +21,112 @@ describe('sleep', function () {
     const now = Date.now();
     await sleep(20);
     expect(Date.now() - now).to.be.at.least(19);
+  });
+  it('should expose cancel on the promise', function () {
+    const d = sleep(100);
+    expect(d.cancel).to.be.a('function');
+  });
+  it('should reject with PromiseCancellationError when cancelled', async function () {
+    const d = sleep(10_000);
+    d.cancel();
+    await expect(d).to.be.rejectedWith(PromiseCancellationError);
+  });
+  it('should reject immediately on cancel without waiting for ms', async function () {
+    const d = sleep(10_000);
+    const start = Date.now();
+    d.cancel();
+    await expect(d).to.be.rejectedWith(PromiseCancellationError);
+    expect(Date.now() - start).to.be.below(100);
+  });
+  it('should use default PromiseCancellationError when cancelError is empty string', async function () {
+    const d = sleep({ms: 10_000, cancelError: ''});
+    d.cancel();
+    try {
+      await d;
+      expect.fail('expected rejection');
+    } catch (err: unknown) {
+      expect(err).to.be.instanceOf(PromiseCancellationError);
+      expect((err as PromiseCancellationError).message).to.equal('Promise cancelled');
+    }
+  });
+  it('should reject with PromiseCancellationError using cancelError string when cancelled', async function () {
+    const d = sleep({ms: 10_000, cancelError: 'aborted'});
+    d.cancel();
+    try {
+      await d;
+      expect.fail('expected rejection');
+    } catch (err: unknown) {
+      expect(err).to.be.instanceOf(PromiseCancellationError);
+      expect((err as PromiseCancellationError).message).to.equal('aborted');
+    }
+  });
+  it('should reject with a provided Error instance on cancel', async function () {
+    class CustomCancel extends Error {
+      constructor(message?: string) {
+        super(message ?? 'custom default');
+        this.name = 'CustomCancel';
+      }
+    }
+    const customErr = new CustomCancel('nope');
+    const d = sleep({ms: 10_000, cancelError: customErr});
+    d.cancel();
+    try {
+      await d;
+      expect.fail('expected rejection');
+    } catch (err: unknown) {
+      expect(err).to.equal(customErr);
+      expect(err).to.be.instanceOf(CustomCancel);
+      expect((err as CustomCancel).message).to.equal('nope');
+    }
+  });
+  it('should resolve when cancelled if cancelError is null', async function () {
+    const d = sleep({ms: 10_000, cancelError: null});
+    const start = Date.now();
+    d.cancel();
+    await d;
+    expect(Date.now() - start).to.be.below(100);
+  });
+  it('should throw TypeError when ms is not finite', function () {
+    expect(() => sleep(Number.NaN)).to.throw(TypeError, /finite number or an object with ms/);
+    expect(() => sleep(Number.POSITIVE_INFINITY)).to.throw(
+      TypeError,
+      /finite number or an object with ms/,
+    );
+  });
+  it('should throw TypeError when arg is not a number or object', function () {
+    expect(() => sleep(null as unknown as number)).to.throw(
+      TypeError,
+      /finite number or an object with ms/,
+    );
+    expect(() => sleep([] as unknown as number)).to.throw(
+      TypeError,
+      /finite number or an object with ms/,
+    );
+  });
+  it('should throw TypeError when object has invalid ms', function () {
+    expect(() => sleep({} as unknown as SleepOptions)).to.throw(
+      TypeError,
+      /options\.ms must be a finite number/,
+    );
+    expect(() => sleep({ms: Number.NaN})).to.throw(
+      TypeError,
+      /options\.ms must be a finite number/,
+    );
+  });
+  it('should accept a null-prototype object with ms', async function () {
+    const o = Object.create(null) as {ms: number};
+    o.ms = 20;
+    const now = Date.now();
+    await sleep(o);
+    expect(Date.now() - now).to.be.at.least(19);
+  });
+  it('should accept a class instance that satisfies SleepOptions', async function () {
+    class Opts implements SleepOptions {
+      ms = 25;
+    }
+    const now = Date.now();
+    await sleep(new Opts());
+    expect(Date.now() - now).to.be.at.least(24);
   });
 });
 

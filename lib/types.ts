@@ -37,6 +37,35 @@ export interface LongSleepOptions {
 export type MapFilterOptions = boolean | {concurrency: number};
 
 /**
+ * Object form of {@link sleep}'s argument: duration plus optional cancellation rejection override.
+ * Structural typing allows class instances; {@link sleep} accepts any non-array object with a finite `ms`.
+ */
+export interface SleepOptions {
+  /** Duration in milliseconds */
+  ms: number;
+  /**
+   * When {@link sleep}'s `cancel` runs: a non-empty string becomes {@link PromiseCancellationError}
+   * with that message; an `Error` rejects with that same instance; `null` resolves the promise
+   * instead of rejecting; omitted, `undefined`, or `''` use the default {@link PromiseCancellationError}.
+   */
+  cancelError?: string | Error | null;
+}
+
+/**
+ * Argument to {@link sleep}: either milliseconds or an options object (see {@link SleepOptions}).
+ */
+export type SleepArg = number | SleepOptions;
+
+/**
+ * A promise with a {@linkcode cancel} method (e.g. from {@link sleep}).
+ *
+ * @typeParam T - Resolved value type; {@link sleep} uses `void`.
+ */
+export type CancellablePromise<T = void> = Promise<T> & {
+  cancel: () => void;
+};
+
+/**
  * Options for {@link waitForCondition}
  */
 export interface WaitForConditionOptions {
