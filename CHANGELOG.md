@@ -1,3 +1,9 @@
+## [6.3.0](https://github.com/appium/asyncbox/compare/v6.2.0...v6.3.0) (2026-05-10)
+
+### Features
+
+* Make sleep cancellable ([#72](https://github.com/appium/asyncbox/issues/72)) ([8e2ff41](https://github.com/appium/asyncbox/commit/8e2ff4161a6b046c3e0433eecef3c80a3300f760))
+
 ## [6.2.0](https://github.com/appium/asyncbox/compare/v6.1.0...v6.2.0) (2026-05-03)
 
 ### Features
