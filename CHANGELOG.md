@@ -1,3 +1,9 @@
+## [6.3.1](https://github.com/appium/asyncbox/compare/v6.3.0...v6.3.1) (2026-07-01)
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump eslint to v10 ([#73](https://github.com/appium/asyncbox/issues/73)) ([03a6f27](https://github.com/appium/asyncbox/commit/03a6f278ef4a402d710650b734e270f711b494e8))
+
 ## [6.3.0](https://github.com/appium/asyncbox/compare/v6.2.0...v6.3.0) (2026-05-10)
 
 ### Features
