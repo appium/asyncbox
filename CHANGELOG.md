@@ -1,3 +1,9 @@
+## [6.3.2](https://github.com/appium/asyncbox/compare/v6.3.1...v6.3.2) (2026-07-02)
+
+### Miscellaneous Chores
+
+* **deps:** bump actions/checkout from 6 to 7 ([#76](https://github.com/appium/asyncbox/issues/76)) ([b6ac875](https://github.com/appium/asyncbox/commit/b6ac8753ba5a914fdcff492deebad4ec72ba523e))
+
 ## [6.3.1](https://github.com/appium/asyncbox/compare/v6.3.0...v6.3.1) (2026-07-01)
 
 ### Miscellaneous Chores
