@@ -1,3 +1,9 @@
+## [6.3.4](https://github.com/appium/asyncbox/compare/v6.3.3...v6.3.4) (2026-07-02)
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump typescript from 5.9.3 to 6.0.3 ([#68](https://github.com/appium/asyncbox/issues/68)) ([6b689fb](https://github.com/appium/asyncbox/commit/6b689fb69a649233f2f8433703edf8c164a416a6))
+
 ## [6.3.3](https://github.com/appium/asyncbox/compare/v6.3.2...v6.3.3) (2026-07-02)
 
 ### Miscellaneous Chores
