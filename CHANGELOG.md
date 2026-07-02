@@ -1,3 +1,9 @@
+## [6.3.3](https://github.com/appium/asyncbox/compare/v6.3.2...v6.3.3) (2026-07-02)
+
+### Miscellaneous Chores
+
+* **deps-dev:** bump @types/node from 25.9.4 to 26.1.0 ([#75](https://github.com/appium/asyncbox/issues/75)) ([8854692](https://github.com/appium/asyncbox/commit/88546928fea3749e279352c32cf855e41d545694))
+
 ## [6.3.2](https://github.com/appium/asyncbox/compare/v6.3.1...v6.3.2) (2026-07-02)
 
 ### Miscellaneous Chores
