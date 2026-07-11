@@ -1,5 +1,3 @@
-import {expect, use} from 'chai';
-import chaiAsPromised from 'chai-as-promised';
 import {
   sleep,
   longSleep,
@@ -13,40 +11,40 @@ import {
   PromiseCancellationError,
   type SleepOptions,
 } from '../lib/asyncbox.js';
-
-use(chaiAsPromised);
+import {it, describe, beforeEach} from 'node:test';
+import assert from 'node:assert/strict';
 
 describe('sleep', function () {
   it('should work like setTimeout', async function () {
     const now = Date.now();
     await sleep(20);
-    expect(Date.now() - now).to.be.at.least(19);
+    assert.ok(Date.now() - now >= 19);
   });
   it('should expose cancel on the promise', function () {
     const d = sleep(100);
-    expect(d.cancel).to.be.a('function');
+    assert.ok(typeof d.cancel === 'function');
   });
   it('should reject with PromiseCancellationError when cancelled', async function () {
     const d = sleep(10_000);
     d.cancel();
-    await expect(d).to.be.rejectedWith(PromiseCancellationError);
+    await assert.rejects(d, PromiseCancellationError);
   });
   it('should reject immediately on cancel without waiting for ms', async function () {
     const d = sleep(10_000);
     const start = Date.now();
     d.cancel();
-    await expect(d).to.be.rejectedWith(PromiseCancellationError);
-    expect(Date.now() - start).to.be.below(100);
+    await assert.rejects(d, PromiseCancellationError);
+    assert.ok(Date.now() - start < 100);
   });
   it('should use default PromiseCancellationError when cancelError is empty string', async function () {
     const d = sleep({ms: 10_000, cancelError: ''});
     d.cancel();
     try {
       await d;
-      expect.fail('expected rejection');
+      assert.fail('expected rejection');
     } catch (err: unknown) {
-      expect(err).to.be.instanceOf(PromiseCancellationError);
-      expect((err as PromiseCancellationError).message).to.equal('Promise cancelled');
+      assert.ok(err instanceof PromiseCancellationError);
+      assert.strictEqual((err as PromiseCancellationError).message, 'Promise cancelled');
     }
   });
   it('should reject with PromiseCancellationError using cancelError string when cancelled', async function () {
@@ -54,10 +52,10 @@ describe('sleep', function () {
     d.cancel();
     try {
       await d;
-      expect.fail('expected rejection');
+      assert.fail('expected rejection');
     } catch (err: unknown) {
-      expect(err).to.be.instanceOf(PromiseCancellationError);
-      expect((err as PromiseCancellationError).message).to.equal('aborted');
+      assert.ok(err instanceof PromiseCancellationError);
+      assert.strictEqual((err as PromiseCancellationError).message, 'aborted');
     }
   });
   it('should reject with a provided Error instance on cancel', async function () {
@@ -72,11 +70,11 @@ describe('sleep', function () {
     d.cancel();
     try {
       await d;
-      expect.fail('expected rejection');
+      assert.fail('expected rejection');
     } catch (err: unknown) {
-      expect(err).to.equal(customErr);
-      expect(err).to.be.instanceOf(CustomCancel);
-      expect((err as CustomCancel).message).to.equal('nope');
+      assert.strictEqual(err, customErr);
+      assert.ok(err instanceof CustomCancel);
+      assert.strictEqual((err as CustomCancel).message, 'nope');
     }
   });
   it('should resolve when cancelled if cancelError is null', async function () {
@@ -84,41 +82,29 @@ describe('sleep', function () {
     const start = Date.now();
     d.cancel();
     await d;
-    expect(Date.now() - start).to.be.below(100);
+    assert.ok(Date.now() - start < 100);
   });
   it('should throw TypeError when ms is not finite', function () {
-    expect(() => sleep(Number.NaN)).to.throw(TypeError, /finite number or an object with ms/);
-    expect(() => sleep(Number.POSITIVE_INFINITY)).to.throw(
-      TypeError,
-      /finite number or an object with ms/,
-    );
+    assert.throws(() => sleep(Number.NaN), /finite number or an object with ms/);
+    assert.throws(() => sleep(Number.POSITIVE_INFINITY), /finite number or an object with ms/);
   });
   it('should throw TypeError when arg is not a number or object', function () {
-    expect(() => sleep(null as unknown as number)).to.throw(
-      TypeError,
-      /finite number or an object with ms/,
-    );
-    expect(() => sleep([] as unknown as number)).to.throw(
-      TypeError,
-      /finite number or an object with ms/,
-    );
+    assert.throws(() => sleep(null as unknown as number), /finite number or an object with ms/);
+    assert.throws(() => sleep([] as unknown as number), /finite number or an object with ms/);
   });
   it('should throw TypeError when object has invalid ms', function () {
-    expect(() => sleep({} as unknown as SleepOptions)).to.throw(
-      TypeError,
+    assert.throws(
+      () => sleep({} as unknown as SleepOptions),
       /options\.ms must be a finite number/,
     );
-    expect(() => sleep({ms: Number.NaN})).to.throw(
-      TypeError,
-      /options\.ms must be a finite number/,
-    );
+    assert.throws(() => sleep({ms: Number.NaN}), /options\.ms must be a finite number/);
   });
   it('should accept a null-prototype object with ms', async function () {
     const o = Object.create(null) as {ms: number};
     o.ms = 20;
     const now = Date.now();
     await sleep(o);
-    expect(Date.now() - now).to.be.at.least(19);
+    assert.ok(Date.now() - now >= 19);
   });
   it('should accept a class instance that satisfies SleepOptions', async function () {
     class Opts implements SleepOptions {
@@ -126,7 +112,7 @@ describe('sleep', function () {
     }
     const now = Date.now();
     await sleep(new Opts());
-    expect(Date.now() - now).to.be.at.least(24);
+    assert.ok(Date.now() - now >= 24);
   });
 });
 
@@ -137,28 +123,28 @@ describe('withTimeout', function () {
 
   it('should resolve when the promise settles before the deadline', async function () {
     const result = await withTimeout(Promise.resolve(42), 1000);
-    expect(result).to.equal(42);
+    assert.strictEqual(result, 42);
   });
   it('should reject with TimeoutError when the deadline is exceeded', async function () {
-    await expect(withTimeout(neverSettles<string>(), 30)).to.be.rejectedWith(TimeoutError);
+    await assert.rejects(withTimeout(neverSettles<string>(), 30), TimeoutError);
   });
   it('should use the default TimeoutError message when none is provided', async function () {
     const timeoutMs = 20;
     try {
       await withTimeout(neverSettles<string>(), timeoutMs);
-      expect.fail('expected rejection');
+      assert.fail('expected rejection');
     } catch (err: unknown) {
-      expect(err).to.be.instanceOf(TimeoutError);
-      expect((err as TimeoutError).message).to.equal(`Operation timed out after ${timeoutMs}ms`);
+      assert.ok(err instanceof TimeoutError);
+      assert.strictEqual((err as TimeoutError).message, `Operation timed out after ${timeoutMs}ms`);
     }
   });
   it('should use a custom message on TimeoutError when provided', async function () {
     try {
       await withTimeout(neverSettles<string>(), 20, 'custom timeout');
-      expect.fail('expected rejection');
+      assert.fail('expected rejection');
     } catch (err: unknown) {
-      expect(err).to.be.instanceOf(TimeoutError);
-      expect((err as TimeoutError).message).to.equal('custom timeout');
+      assert.ok(err instanceof TimeoutError);
+      assert.strictEqual((err as TimeoutError).message, 'custom timeout');
     }
   });
   it('should reject with a provided Error instance on timeout', async function () {
@@ -171,11 +157,11 @@ describe('withTimeout', function () {
     const customErr = new CustomTimeout('overridden');
     try {
       await withTimeout(neverSettles<string>(), 20, customErr);
-      expect.fail('expected rejection');
+      assert.fail('expected rejection');
     } catch (err: unknown) {
-      expect(err).to.equal(customErr);
-      expect(err).to.be.instanceOf(CustomTimeout);
-      expect((err as CustomTimeout).message).to.equal('overridden');
+      assert.strictEqual(err, customErr);
+      assert.ok(err instanceof CustomTimeout);
+      assert.strictEqual((err as CustomTimeout).message, 'overridden');
     }
   });
   it('should propagate rejection from the underlying promise before the deadline', async function () {
@@ -183,7 +169,7 @@ describe('withTimeout', function () {
       await sleep(10);
       throw new Error('boom');
     })();
-    await expect(withTimeout(failing, 1000)).to.be.rejectedWith('boom');
+    await assert.rejects(withTimeout(failing, 1000), /boom/);
   });
 });
 
@@ -191,17 +177,17 @@ describe('longSleep', function () {
   it('should work like sleep in general', async function () {
     const now = Date.now();
     await longSleep(20);
-    expect(Date.now() - now).to.be.at.least(19);
+    assert.ok(Date.now() - now >= 19);
   });
   it('should work like sleep with values less than threshold', async function () {
     const now = Date.now();
     await longSleep(20, {thresholdMs: 100});
-    expect(Date.now() - now).to.be.at.least(19);
+    assert.ok(Date.now() - now >= 19);
   });
   it('should work like sleep with values above threshold, but quantized', async function () {
     const now = Date.now();
     await longSleep(50, {thresholdMs: 20, intervalMs: 40});
-    expect(Date.now() - now).to.be.at.least(79);
+    assert.ok(Date.now() - now >= 79);
   });
   it('should trigger a progress callback if specified', async function () {
     let callCount = 0;
@@ -217,9 +203,9 @@ describe('longSleep', function () {
       timeLeft: number;
       progress: number;
     }) {
-      expect(elapsedMs).to.be.above(curElapsed);
-      expect(timeLeft).to.be.below(curTimeLeft);
-      expect(progress).to.be.above(curProgress);
+      assert.ok(elapsedMs > curElapsed);
+      assert.ok(timeLeft < curTimeLeft);
+      assert.ok(progress > curProgress);
       curElapsed = elapsedMs;
       curTimeLeft = timeLeft;
       curProgress = progress;
@@ -227,11 +213,11 @@ describe('longSleep', function () {
     };
     const now = Date.now();
     await longSleep(500, {thresholdMs: 1, intervalMs: 100, progressCb});
-    expect(Date.now() - now).to.be.above(49);
-    expect(callCount).to.be.above(3);
-    expect(curProgress >= 1).to.be.true;
-    expect(curTimeLeft <= 0).to.be.true;
-    expect(curElapsed >= 50).to.be.true;
+    assert.ok(Date.now() - now > 49);
+    assert.ok(callCount > 3);
+    assert.ok(curProgress >= 1);
+    assert.ok(curTimeLeft <= 0);
+    assert.ok(curElapsed >= 50);
   });
 });
 
@@ -272,9 +258,9 @@ describe('retry', function () {
   it('should return the result of a passing function', async function () {
     const start = Date.now();
     const res = await retry(3, okFn, 5, 4);
-    expect(res).to.equal(20);
-    expect(Date.now() - start).to.be.at.least(14);
-    expect(okFnCalls).to.equal(1);
+    assert.strictEqual(res, 20);
+    assert.ok(Date.now() - start >= 14);
+    assert.strictEqual(okFnCalls, 1);
   });
   it('should retry a failing function and eventually throw the same err', async function () {
     let err: Error | null = null;
@@ -284,10 +270,10 @@ describe('retry', function () {
     } catch (e) {
       err = e as Error;
     }
-    expect(err).to.exist;
-    expect(err!.message).to.equal('bad');
-    expect(badFnCalls).to.equal(3);
-    expect(Date.now() - start).to.be.at.least(44);
+    assert.ok(err);
+    assert.strictEqual(err!.message, 'bad');
+    assert.strictEqual(badFnCalls, 3);
+    assert.ok(Date.now() - start >= 44);
   });
   it('should return the correct value with a function that eventually passes', async function () {
     let err: Error | null = null;
@@ -297,18 +283,18 @@ describe('retry', function () {
     } catch (e) {
       err = e as Error;
     }
-    expect(err).to.exist;
-    expect(err!.message).to.equal('not ok yet');
-    expect(eventuallyOkFnCalls).to.equal(3);
-    expect(Date.now() - start).to.be.above(35);
+    assert.ok(err);
+    assert.strictEqual(err!.message, 'not ok yet');
+    assert.strictEqual(eventuallyOkFnCalls, 3);
+    assert.ok(Date.now() - start > 35);
 
     // rerun with ok number of calls
     start = Date.now();
     eventuallyOkFnCalls = 0;
     const res = await retry(3, eventuallyOkFn, 3);
-    expect(eventuallyOkFnCalls).to.equal(3);
-    expect(res).to.equal(9);
-    expect(Date.now() - start).to.be.above(35);
+    assert.strictEqual(eventuallyOkFnCalls, 3);
+    assert.strictEqual(res, 9);
+    assert.ok(Date.now() - start > 35);
   });
   describe('retryInterval', function () {
     it('should return the correct value with a function that eventually passes', async function () {
@@ -320,26 +306,25 @@ describe('retry', function () {
       } catch (e) {
         err = e as Error;
       }
-      expect(err).to.exist;
-      expect(err!.message).to.equal('not ok yet');
-      expect(eventuallyOkFnCalls).to.equal(3);
-      expect(Date.now() - start).to.be.at.least(30);
+      assert.ok(err);
+      assert.strictEqual(err!.message, 'not ok yet');
+      assert.strictEqual(eventuallyOkFnCalls, 3);
+      assert.ok(Date.now() - start >= 30);
 
       // rerun with ok number of calls
       start = Date.now();
       eventuallyOkFnCalls = 0;
       const res = await retryInterval(3, 15, eventuallyOkNoSleepFn, 3);
-      expect(eventuallyOkFnCalls).to.equal(3);
-      expect(res).to.equal(9);
-      // XXX: flaky
-      expect(Date.now() - start).to.be.at.least(30);
+      assert.strictEqual(eventuallyOkFnCalls, 3);
+      assert.strictEqual(res, 9);
+      assert.ok(Date.now() - start >= 30);
     });
     it('should not wait on the final error', async function () {
       const start = Date.now();
       try {
         await retryInterval(3, 2000, badFn);
       } catch {
-        expect(Date.now() - start).to.be.below(4100);
+        assert.ok(Date.now() - start < 4100);
       }
     });
   });
@@ -353,9 +338,9 @@ describe('waitForCondition', function () {
     }
     const result = await waitForCondition(condFn, {waitMs: 1000, intervalMs: 10});
     const duration = Date.now() - ref;
-    expect(duration).to.be.above(200);
-    expect(duration).to.be.below(250);
-    expect(result).to.be.true;
+    assert.ok(duration > 200);
+    assert.ok(duration < 250);
+    assert.ok(result);
   });
   it('should wait and fail', async function () {
     const ref = Date.now();
@@ -364,9 +349,9 @@ describe('waitForCondition', function () {
     }
     try {
       await waitForCondition(condFn, {waitMs: 100, intervalMs: 10});
-      expect.fail('Should have thrown an error');
+      assert.fail('Should have thrown an error');
     } catch (err: any) {
-      expect(err.message).to.match(/Condition unmet/);
+      assert.ok(err.message.match(/Condition unmet/));
     }
   });
   it('should reduce interval to not exceed timeout', async function () {
@@ -376,7 +361,7 @@ describe('waitForCondition', function () {
     }
     await waitForCondition(condFn, {waitMs: 30, intervalMs: 20});
     const duration = Date.now() - ref;
-    expect(duration).to.be.below(35);
+    assert.ok(duration < 35);
   });
 });
 
@@ -389,34 +374,33 @@ describe('asyncmap', function () {
   const newColl = [2, 4, 6, 8, 10];
   it('should map elements one at a time', async function () {
     const start = Date.now();
-    expect(await asyncmap(coll, mapper, false)).to.eql(newColl);
-    expect(Date.now() - start).to.be.at.least(50);
+    assert.deepStrictEqual(await asyncmap(coll, mapper, false), newColl);
+    assert.ok(Date.now() - start >= 50);
   });
   it('should map elements in parallel', async function () {
     const start = Date.now();
-    expect(await asyncmap(coll, mapper)).to.eql(newColl);
-    expect(Date.now() - start).to.be.at.most(20);
+    assert.deepStrictEqual(await asyncmap(coll, mapper), newColl);
+    assert.ok(Date.now() - start <= 20);
   });
   it('should map elements with concurrency', async function () {
     const start = Date.now();
-    expect(await asyncmap(coll, mapper, {concurrency: 2})).to.eql(newColl);
-    expect(Date.now() - start).to.be.at.least(29);
-    expect(Date.now() - start).to.be.at.most(40);
+    assert.deepStrictEqual(await asyncmap(coll, mapper, {concurrency: 2}), newColl);
+    assert.ok(Date.now() - start >= 29);
+    assert.ok(Date.now() - start <= 40);
   });
   it('should handle an empty array', async function () {
-    expect(await asyncmap([], mapper, false)).to.eql([]);
+    assert.deepStrictEqual(await asyncmap([], mapper, false), []);
   });
   it('should handle an empty array in parallel', async function () {
-    expect(await asyncmap([], mapper)).to.eql([]);
+    assert.deepStrictEqual(await asyncmap([], mapper), []);
   });
   it('should work for a sync mapper function', async function () {
     const syncmapper = (el: number): number => el * 2;
-    expect(await asyncmap(coll, syncmapper, false)).to.eql(newColl);
-    expect(await asyncmap(coll, syncmapper)).to.eql(newColl);
+    assert.deepStrictEqual(await asyncmap(coll, syncmapper, false), newColl);
+    assert.deepStrictEqual(await asyncmap(coll, syncmapper), newColl);
   });
   it('should raise an error if options is null', async function () {
-    // @ts-expect-error - testing invalid inputs
-    await expect(asyncmap(coll, mapper, null)).to.be.rejectedWith('Options cannot be null');
+    await assert.rejects(() => asyncmap(coll, mapper, null as any), /Options cannot be null/);
   });
 });
 
@@ -429,33 +413,32 @@ describe('asyncfilter', function () {
   const newColl = [2, 4];
   it('should filter elements one at a time', async function () {
     const start = Date.now();
-    expect(await asyncfilter(coll, filter, false)).to.eql(newColl);
-    expect(Date.now() - start).to.be.at.least(50);
+    assert.deepStrictEqual(await asyncfilter(coll, filter, false), newColl);
+    assert.ok(Date.now() - start >= 50);
   });
   it('should filter elements in parallel', async function () {
     const start = Date.now();
-    expect(await asyncfilter(coll, filter)).to.eql(newColl);
-    expect(Date.now() - start).to.be.at.most(20);
+    assert.deepStrictEqual(await asyncfilter(coll, filter), newColl);
+    assert.ok(Date.now() - start <= 20);
   });
   it('should filter elements with concurrency', async function () {
     const start = Date.now();
-    expect(await asyncfilter(coll, filter, {concurrency: 2})).to.eql(newColl);
-    expect(Date.now() - start).to.be.at.least(29);
-    expect(Date.now() - start).to.be.at.most(40);
+    assert.deepStrictEqual(await asyncfilter(coll, filter, {concurrency: 2}), newColl);
+    assert.ok(Date.now() - start >= 29);
+    assert.ok(Date.now() - start <= 40);
   });
   it('should handle an empty array', async function () {
-    expect(await asyncfilter([], filter, false)).to.eql([]);
+    assert.deepStrictEqual(await asyncfilter([], filter, false), []);
   });
   it('should handle an empty array in parallel', async function () {
-    expect(await asyncfilter([], filter)).to.eql([]);
+    assert.deepStrictEqual(await asyncfilter([], filter), []);
   });
   it('should work for a sync filter function', async function () {
     const syncfilter = (el: number): boolean => el % 2 === 0;
-    expect(await asyncfilter(coll, syncfilter, false)).to.eql(newColl);
-    expect(await asyncfilter(coll, syncfilter)).to.eql(newColl);
+    assert.deepStrictEqual(await asyncfilter(coll, syncfilter, false), newColl);
+    assert.deepStrictEqual(await asyncfilter(coll, syncfilter), newColl);
   });
   it('should raise an error if options is null', async function () {
-    // @ts-expect-error - testing invalid inputs
-    await expect(asyncfilter(coll, filter, null)).to.be.rejectedWith('Options cannot be null');
+    await assert.rejects(() => asyncfilter(coll, filter, null as any), /Options cannot be null/);
   });
 });

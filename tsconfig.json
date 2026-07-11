@@ -4,7 +4,7 @@
   "compilerOptions": {
     "strict": true,
     "outDir": "build",
-    "types": ["node", "mocha"],
+    "types": ["node"],
     "checkJs": true
   },
   "include": [
