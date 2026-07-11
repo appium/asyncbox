@@ -1,3 +1,9 @@
+## [6.3.5](https://github.com/appium/asyncbox/compare/v6.3.4...v6.3.5) (2026-07-11)
+
+### Miscellaneous Chores
+
+* Drop mocha and chai ([#79](https://github.com/appium/asyncbox/issues/79)) ([a8c8d22](https://github.com/appium/asyncbox/commit/a8c8d22dbf71f076f36652f3c391e19bdda6cc2e))
+
 ## [6.3.4](https://github.com/appium/asyncbox/compare/v6.3.3...v6.3.4) (2026-07-02)
 
 ### Miscellaneous Chores
