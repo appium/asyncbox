@@ -46,7 +46,7 @@
     "rebuild": "npm run clean; npm run build",
     "dev": "npm run build -- --watch",
     "prepare": "npm run rebuild",
-    "test": "node --test --enable-source-maps --test-force-exit --test-timeout=60000 \"./build/esm/test/**/*.spec.js\" \"./smoke/**/*.spec.cjs\"",
+    "test": "node --test --enable-source-maps --test-force-exit --test-timeout=60000 \"./build/esm/test/**/*.spec.js\" \"./test/*.spec.cjs\"",
     "lint": "oxlint -c oxlint.config.mjs .",
     "lint:fix": "oxlint -c oxlint.config.mjs --fix .",
     "format": "oxfmt -c oxfmt.config.mjs .",

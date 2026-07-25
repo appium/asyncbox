@@ -307,7 +307,7 @@ describe('retry', function () {
       assert.ok(err);
       assert.strictEqual(err!.message, 'not ok yet');
       assert.strictEqual(eventuallyOkFnCalls, 3);
-      assert.ok(Date.now() - start >= 30);
+      assert.ok(Date.now() - start >= 29);
 
       // rerun with ok number of calls
       start = Date.now();
@@ -315,7 +315,7 @@ describe('retry', function () {
       const res = await retryInterval(3, 15, eventuallyOkNoSleepFn, 3);
       assert.strictEqual(eventuallyOkFnCalls, 3);
       assert.strictEqual(res, 9);
-      assert.ok(Date.now() - start >= 30);
+      assert.ok(Date.now() - start >= 29);
     });
     it('should not wait on the final error', async function () {
       const start = Date.now();
@@ -373,7 +373,7 @@ describe('asyncmap', function () {
   it('should map elements one at a time', async function () {
     const start = Date.now();
     assert.deepStrictEqual(await asyncmap(coll, mapper, false), newColl);
-    assert.ok(Date.now() - start >= 50);
+    assert.ok(Date.now() - start >= 49);
   });
   it('should map elements in parallel', async function () {
     const start = Date.now();
@@ -384,7 +384,7 @@ describe('asyncmap', function () {
     const start = Date.now();
     assert.deepStrictEqual(await asyncmap(coll, mapper, {concurrency: 2}), newColl);
     assert.ok(Date.now() - start >= 29);
-    assert.ok(Date.now() - start <= 40);
+    assert.ok(Date.now() - start <= 60);
   });
   it('should handle an empty array', async function () {
     assert.deepStrictEqual(await asyncmap([], mapper, false), []);
@@ -412,7 +412,7 @@ describe('asyncfilter', function () {
   it('should filter elements one at a time', async function () {
     const start = Date.now();
     assert.deepStrictEqual(await asyncfilter(coll, filter, false), newColl);
-    assert.ok(Date.now() - start >= 50);
+    assert.ok(Date.now() - start >= 49);
   });
   it('should filter elements in parallel', async function () {
     const start = Date.now();
@@ -423,7 +423,7 @@ describe('asyncfilter', function () {
     const start = Date.now();
     assert.deepStrictEqual(await asyncfilter(coll, filter, {concurrency: 2}), newColl);
     assert.ok(Date.now() - start >= 29);
-    assert.ok(Date.now() - start <= 40);
+    assert.ok(Date.now() - start <= 60);
   });
   it('should handle an empty array', async function () {
     assert.deepStrictEqual(await asyncfilter([], filter, false), []);

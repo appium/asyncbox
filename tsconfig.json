@@ -6,5 +6,6 @@
     "types": ["node"],
     "checkJs": true
   },
-  "include": ["lib", "test"]
+  "include": ["lib", "test"],
+  "exclude": ["test/*.cjs"]
 }
