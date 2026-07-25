@@ -20,22 +20,42 @@
     "node": "^20.19.0 || ^22.12.0 || >=24.0.0",
     "npm": ">=10"
   },
-  "main": "./build/lib/asyncbox.js",
+  "type": "module",
+  "main": "./build/cjs/lib/asyncbox.js",
+  "module": "./build/esm/lib/asyncbox.js",
+  "types": "./build/cjs/lib/asyncbox.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./build/esm/lib/asyncbox.d.ts",
+        "default": "./build/esm/lib/asyncbox.js"
+      },
+      "require": {
+        "types": "./build/cjs/lib/asyncbox.d.ts",
+        "default": "./build/cjs/lib/asyncbox.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
   "bin": {},
   "directories": {
     "lib": "./lib"
   },
   "files": [
     "lib/**/*",
-    "build/lib/**/*"
+    "build/cjs/lib/**/*",
+    "build/cjs/package.json",
+    "build/esm/lib/**/*",
+    "build/esm/package.json"
   ],
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc -b tsconfig.esm.json tsconfig.cjs.json",
+    "postbuild": "node scripts/postbuild.mjs",
     "clean": "npm run build -- --clean",
     "rebuild": "npm run clean; npm run build",
     "dev": "npm run build -- --watch",
     "prepare": "npm run rebuild",
-    "test": "node --test --enable-source-maps --test-force-exit --test-timeout=60000 \"./build/test/**/*.spec.js\"",
+    "test": "node --test --enable-source-maps --test-force-exit --test-timeout=60000 \"./build/esm/test/**/*.spec.js\" \"./test/*.spec.cjs\"",
     "lint": "eslint .",
     "format": "prettier -w ./lib ./test",
     "format:check": "prettier --check ./lib ./test",
@@ -59,6 +79,5 @@
     "prettier": "^3.0.0",
     "semantic-release": "^25.0.2",
     "typescript": "^6.0.3"
-  },
-  "types": "./build/lib/asyncbox.d.ts"
+  }
 }
