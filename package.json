@@ -51,7 +51,7 @@
   "scripts": {
     "build": "tsc -b tsconfig.esm.json tsconfig.cjs.json",
     "postbuild": "node scripts/postbuild.mjs",
-    "clean": "npm run build -- --clean",
+    "clean": "rm -rf build",
     "rebuild": "npm run clean; npm run build",
     "dev": "npm run build -- --watch",
     "prepare": "npm run rebuild",
