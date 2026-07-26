@@ -1,3 +1,9 @@
+## [6.4.0](https://github.com/appium/asyncbox/compare/v6.3.5...v6.4.0) (2026-07-26)
+
+### Features
+
+* Publish dual CJS and ESM builds ([#85](https://github.com/appium/asyncbox/issues/85)) ([623bedd](https://github.com/appium/asyncbox/commit/623beddaed1ffac11fd5edbfd3a5f09901bc4c4a))
+
 ## [6.3.5](https://github.com/appium/asyncbox/compare/v6.3.4...v6.3.5) (2026-07-11)
 
 ### Miscellaneous Chores
