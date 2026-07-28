@@ -1,25 +1,32 @@
 {
   "name": "asyncbox",
-  "description": "A collection of small async/await utilities",
-  "tags": [
-    "async/await",
-    "es7",
-    "async"
-  ],
   "version": "6.4.0",
-  "author": "jlipps@gmail.com",
+  "description": "A collection of small async/await utilities",
+  "keywords": [
+    "async",
+    "async/await",
+    "es7"
+  ],
+  "bugs": {
+    "url": "https://github.com/appium/asyncbox/issues"
+  },
   "license": "Apache-2.0",
+  "author": "jlipps@gmail.com",
   "repository": {
     "type": "git",
     "url": "https://github.com/appium/asyncbox.git"
   },
-  "bugs": {
-    "url": "https://github.com/appium/asyncbox/issues"
+  "bin": {},
+  "directories": {
+    "lib": "./lib"
   },
-  "engines": {
-    "node": "^20.19.0 || ^22.12.0 || >=24.0.0",
-    "npm": ">=10"
-  },
+  "files": [
+    "lib/**/*",
+    "build/cjs/lib/**/*",
+    "build/cjs/package.json",
+    "build/esm/lib/**/*",
+    "build/esm/package.json"
+  ],
   "type": "module",
   "main": "./build/cjs/lib/asyncbox.js",
   "module": "./build/esm/lib/asyncbox.js",
@@ -37,17 +44,6 @@
     },
     "./package.json": "./package.json"
   },
-  "bin": {},
-  "directories": {
-    "lib": "./lib"
-  },
-  "files": [
-    "lib/**/*",
-    "build/cjs/lib/**/*",
-    "build/cjs/package.json",
-    "build/esm/lib/**/*",
-    "build/esm/package.json"
-  ],
   "scripts": {
     "build": "tsc -b tsconfig.esm.json tsconfig.cjs.json",
     "postbuild": "node scripts/postbuild.mjs",
@@ -56,28 +52,23 @@
     "dev": "npm run build -- --watch",
     "prepare": "npm run rebuild",
     "test": "node --test --enable-source-maps --test-force-exit --test-timeout=60000 \"./build/esm/test/**/*.spec.js\" \"./test/*.spec.cjs\"",
-    "lint": "eslint .",
-    "format": "prettier -w ./lib ./test",
-    "format:check": "prettier --check ./lib ./test",
+    "lint": "oxlint -c oxlint.config.mjs .",
+    "lint:fix": "oxlint -c oxlint.config.mjs --fix .",
+    "format": "oxfmt -c oxfmt.config.mjs .",
+    "format:check": "oxfmt -c oxfmt.config.mjs --check .",
     "watch": "npm run dev"
-  },
-  "prettier": {
-    "bracketSpacing": false,
-    "printWidth": 100,
-    "singleQuote": true
   },
   "dependencies": {
     "p-limit": "^7.2.0"
   },
   "devDependencies": {
-    "@appium/eslint-config-appium-ts": "^3.2.3",
-    "@appium/tsconfig": "^1.0.0",
-    "@semantic-release/changelog": "^6.0.1",
-    "@semantic-release/git": "^10.0.1",
-    "@types/node": "^26.1.0",
-    "conventional-changelog-conventionalcommits": "^9.0.0",
-    "prettier": "^3.0.0",
-    "semantic-release": "^25.0.2",
-    "typescript": "^6.0.3"
+    "@appium/oxc-config": "^1.1.0",
+    "@appium/semantic-release-config": "^1.1.0",
+    "@appium/tsconfig": "^1.2.0",
+    "@types/node": "^26.1.0"
+  },
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0 || >=24.0.0",
+    "npm": ">=10"
   }
 }
