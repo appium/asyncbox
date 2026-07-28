@@ -1,3 +1,9 @@
+## [6.4.1](https://github.com/appium/asyncbox/compare/v6.4.0...v6.4.1) (2026-07-28)
+
+### Miscellaneous Chores
+
+* Integrate oxc and release configs ([#87](https://github.com/appium/asyncbox/issues/87)) ([ad343ee](https://github.com/appium/asyncbox/commit/ad343eee914133282294ac690b0f7ae09105d33c))
+
 ## [6.4.0](https://github.com/appium/asyncbox/compare/v6.3.5...v6.4.0) (2026-07-26)
 
 ### Features
