@@ -1,3 +1,6 @@
+import assert from 'node:assert/strict';
+import {it, describe, beforeEach} from 'node:test';
+
 import {
   sleep,
   longSleep,
@@ -11,8 +14,6 @@ import {
   PromiseCancellationError,
   type SleepOptions,
 } from '../lib/asyncbox.js';
-import {it, describe, beforeEach} from 'node:test';
-import assert from 'node:assert/strict';
 
 describe('sleep', function () {
   it('should work like setTimeout', async function () {
@@ -93,10 +94,7 @@ describe('sleep', function () {
     assert.throws(() => sleep([] as unknown as number), /finite number or an object with ms/);
   });
   it('should throw TypeError when object has invalid ms', function () {
-    assert.throws(
-      () => sleep({} as unknown as SleepOptions),
-      /options\.ms must be a finite number/,
-    );
+    assert.throws(() => sleep({} as unknown as SleepOptions), /options\.ms must be a finite number/);
     assert.throws(() => sleep({ms: Number.NaN}), /options\.ms must be a finite number/);
   });
   it('should accept a null-prototype object with ms', async function () {
