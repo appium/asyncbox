@@ -1,3 +1,9 @@
+## [6.4.2](https://github.com/appium/asyncbox/compare/v6.4.1...v6.4.2) (2026-07-30)
+
+### Miscellaneous Chores
+
+* **deps:** bump actions/setup-node from 6 to 7 ([#81](https://github.com/appium/asyncbox/issues/81)) ([d46a941](https://github.com/appium/asyncbox/commit/d46a941f2a04da2036defc1eaff4d254362c2ed1))
+
 ## [6.4.1](https://github.com/appium/asyncbox/compare/v6.4.0...v6.4.1) (2026-07-28)
 
 ### Miscellaneous Chores

@@ -1,6 +1,6 @@
 {
   "name": "asyncbox",
-  "version": "6.4.1",
+  "version": "6.4.2",
   "description": "A collection of small async/await utilities",
   "keywords": [
     "async",
