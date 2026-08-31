@@ -1,3 +1,9 @@
+## [6.4.3](https://github.com/appium/asyncbox/compare/v6.4.2...v6.4.3) (2026-08-31)
+
+### Bug Fixes
+
+* CJS/ESM p-limit import race ([#88](https://github.com/appium/asyncbox/issues/88)) ([6760fd4](https://github.com/appium/asyncbox/commit/6760fd46110cab3543b5662f4fc7da67e207488e))
+
 ## [6.4.2](https://github.com/appium/asyncbox/compare/v6.4.1...v6.4.2) (2026-07-30)
 
 ### Miscellaneous Chores
