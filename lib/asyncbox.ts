@@ -252,9 +252,7 @@ export async function asyncmap<T, R>(
     );
   }
   const adjustedMapper =
-    options === true
-      ? mapperAsync
-      : (await getLimitFunction())(mapperAsync, {concurrency: options.concurrency});
+    options === true ? mapperAsync : (await getLimitFunction())(mapperAsync, {concurrency: options.concurrency});
   return Promise.all(coll.map(adjustedMapper));
 }
 
@@ -284,9 +282,7 @@ export async function asyncfilter<T>(
     }, Promise.resolve([]));
   }
   const adjustedFilter =
-    options === true
-      ? filterAsync
-      : (await getLimitFunction())(filterAsync, {concurrency: options.concurrency});
+    options === true ? filterAsync : (await getLimitFunction())(filterAsync, {concurrency: options.concurrency});
   const bools = await Promise.all(coll.map(adjustedFilter));
   return coll.reduce<T[]>((acc, item, i) => {
     if (bools[i]) {
