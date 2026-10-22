@@ -7,5 +7,6 @@ const asyncbox = require('asyncbox');
 test('require() interop with the CJS build', async () => {
   assert.equal(typeof asyncbox.sleep, 'function');
   assert.equal(typeof asyncbox.retry, 'function');
+  assert.equal(typeof asyncbox.AsyncLock, 'function');
   await asyncbox.sleep(1);
 });

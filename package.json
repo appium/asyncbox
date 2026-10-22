@@ -28,18 +28,18 @@
     "build/esm/package.json"
   ],
   "type": "module",
-  "main": "./build/cjs/lib/asyncbox.js",
-  "module": "./build/esm/lib/asyncbox.js",
-  "types": "./build/cjs/lib/asyncbox.d.ts",
+  "main": "./build/cjs/lib/index.js",
+  "module": "./build/esm/lib/index.js",
+  "types": "./build/cjs/lib/index.d.ts",
   "exports": {
     ".": {
       "import": {
-        "types": "./build/esm/lib/asyncbox.d.ts",
-        "default": "./build/esm/lib/asyncbox.js"
+        "types": "./build/esm/lib/index.d.ts",
+        "default": "./build/esm/lib/index.js"
       },
       "require": {
-        "types": "./build/cjs/lib/asyncbox.d.ts",
-        "default": "./build/cjs/lib/asyncbox.js"
+        "types": "./build/cjs/lib/index.d.ts",
+        "default": "./build/cjs/lib/index.js"
       }
     },
     "./package.json": "./package.json"

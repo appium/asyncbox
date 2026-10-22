@@ -208,6 +208,49 @@ try {
 }
 ```
 
+### AsyncLock
+
+A promise-based mutex keyed by string, derived from the unmaintained
+[async-lock](https://github.com/rogierschouten/async-lock) (MIT). Tasks with the
+same key run one at a time in FIFO order; different keys run concurrently.
+
+Differences from `async-lock`: promises only (no callbacks, custom `Promise`
+or domain support), and each task runs in the `AsyncLocalStorage` context of
+its own `acquire` caller instead of the previous lock holder's one, so no
+`AsyncResource.bind` is needed. A task that outlives `maxExecutionTime` can no
+longer release the lock a second time, and queued tasks that time out are
+removed from the queue.
+
+```js
+import {AsyncLock} from 'asyncbox';
+
+const lock = new AsyncLock({maxPending: 10});
+
+const result = await lock.acquire('key', async () => {
+  // runs exclusively for 'key'
+  return 42;
+});
+
+// several keys are held together; they are acquired in sorted order, so overlapping calls cannot deadlock
+await lock.acquire(['key1', 'key2'], () => {});
+
+// per-call options: timeout, maxOccupationTime, maxExecutionTime, maxPending, skipQueue
+await lock.acquire('key', () => {}, {timeout: 5000, skipQueue: true});
+
+lock.getQueueLength('key'); // tasks waiting for the key (the running one is not counted)
+lock.isBusy('key'); // running or pending tasks for the key
+lock.isBusy(); // any key
+```
+
+Options can be passed to the constructor and overridden per `acquire` call.
+Times are in ms, up to 2147483647, and `0` means no limit.
+
+- `timeout` (default `0`) - max wait in the queue (for all the keys of a multi-key call together) before the task is rejected and dropped
+- `maxOccupationTime` (default `0`) - max time from `acquire` to completion, queue wait included; one budget is shared by all keys of a multi-key call
+- `maxExecutionTime` (default `0`) - max time the task may run while holding the lock; the lock is released when exceeded (for a multi-key call, it counts from when all keys are held and releases all of them)
+- `maxPending` (default `1000`) - max tasks waiting per key; further ones are rejected right away, so `0` rejects every task that would have to wait
+- `skipQueue` (default `false`, per call only) - put the task at the front of the queue
+
 ### Run the tests
 
 ```
