@@ -199,6 +199,25 @@ describe('AsyncLock', function () {
       assert.throws(() => lock.acquire([], () => 1), TypeError);
     });
 
+    it('should claim a large batch of free keys without overflowing the stack', async function () {
+      const lock = new AsyncLock();
+      const keys = Array.from({length: 20_000}, (_, i) => `key${i}`);
+      assert.equal(await lock.acquire(keys, () => 1), 1);
+      assert.ok(!lock.isBusy());
+    });
+
+    it('should claim a large batch resumed after waiting for its first key', async function () {
+      const lock = new AsyncLock();
+      const keys = Array.from({length: 20_000}, (_, i) => `key${i}`);
+      const gate = deferred();
+      const holder = lock.acquire(keys[0], () => gate.promise);
+      const batch = lock.acquire(keys, () => 1);
+      gate.resolve();
+      await holder;
+      assert.equal(await batch, 1);
+      assert.ok(!lock.isBusy());
+    });
+
     it('should not mutate the passed array', async function () {
       const lock = new AsyncLock();
       const keys = ['a', 'b'];

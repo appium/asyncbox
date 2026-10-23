@@ -131,14 +131,21 @@ class KeyClaim {
     private readonly onDenied: (error: Error) => void,
   ) {}
 
-  /** Take the key right away if it is free, otherwise wait in its queue. */
-  join(): void {
+  /**
+   * Take the key right away if it is free, otherwise wait in its queue.
+   *
+   * @returns Whether the key is held. If not, `onGranted` is called once it is, unless the claim
+   * is denied.
+   */
+  join(): boolean {
     const {timeout, maxPending, skipQueue} = this.opts;
     const queue = this.queues.get(this.key);
     if (!queue) {
       this.queues.set(this.key, []);
-      this.grant();
-    } else if (queue.length >= maxPending) {
+      this.holding = true;
+      return true;
+    }
+    if (queue.length >= maxPending) {
       this.onDenied(new Error(`Too many pending tasks in queue ${this.key}`));
     } else {
       if (skipQueue) {
@@ -153,6 +160,7 @@ class KeyClaim {
         );
       }
     }
+    return false;
   }
 
   /**
@@ -238,26 +246,32 @@ class Acquisition<T> {
     if (maxOccupationTime) {
       this.occupationTimer = setTimeout(() => this.expire(), maxOccupationTime);
     }
-    this.claimKey(0);
+    this.claimKeys(0);
   }
 
-  private claimKey(index: number): void {
-    if (index === this.keys.length) {
-      this.execute();
-      return;
-    }
+  // Free keys are claimed in a loop, not recursively, so that a large batch cannot overflow the stack
+  private claimKeys(from: number): void {
     const {maxPending, skipQueue} = this.opts;
-    // The queue timeout is a budget for waiting for all the keys, not for each one
-    const timeout = this.queueDeadline ? Math.max(this.queueDeadline - performance.now(), 1) : 0;
-    const claim = new KeyClaim(
-      this.queues,
-      this.keys[index],
-      {timeout, maxPending, skipQueue},
-      () => this.claimKey(index + 1),
-      (error) => this.abort(error),
-    );
-    this.claims.push(claim);
-    claim.join();
+    try {
+      for (let index = from; index < this.keys.length; index++) {
+        // The queue timeout is a budget for waiting for all the keys, not for each one
+        const timeout = this.queueDeadline ? Math.max(this.queueDeadline - performance.now(), 1) : 0;
+        const claim = new KeyClaim(
+          this.queues,
+          this.keys[index],
+          {timeout, maxPending, skipQueue},
+          () => this.claimKeys(index + 1),
+          (error) => this.abort(error),
+        );
+        this.claims.push(claim);
+        if (!claim.join()) {
+          return;
+        }
+      }
+      this.execute();
+    } catch (error) {
+      this.abort(error);
+    }
   }
 
   private execute(): void {
@@ -281,7 +295,7 @@ class Acquisition<T> {
   }
 
   // Reject and release all the keys; a running task is left to finish on its own
-  private abort(error: Error): void {
+  private abort(error: unknown): void {
     this.settle({error});
     this.release();
   }
