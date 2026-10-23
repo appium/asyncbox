@@ -1,3 +1,9 @@
+## [6.5.0](https://github.com/appium/asyncbox/compare/v6.4.3...v6.5.0) (2026-10-23)
+
+### Features
+
+* add AsyncLock and split helpers into modules ([#90](https://github.com/appium/asyncbox/issues/90)) ([56e06bd](https://github.com/appium/asyncbox/commit/56e06bd661eb8435052ebeec7d2ac012ff578ff3))
+
 ## [6.4.3](https://github.com/appium/asyncbox/compare/v6.4.2...v6.4.3) (2026-08-31)
 
 ### Bug Fixes
