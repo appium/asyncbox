@@ -1,4 +1,4 @@
-/** Base class of all errors thrown by this package; match by `instanceof` or {@link AsyncboxError.code}. */
+/** Base class of the built-in typed errors of this package; match by `instanceof` or {@link AsyncboxError.code}. */
 export class AsyncboxError extends Error {
   /** Stable machine-readable identifier, e.g. `ERR_ASYNCBOX_TIMEOUT` */
   readonly code: string;

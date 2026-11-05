@@ -318,7 +318,10 @@ describe('AsyncLock', function () {
       const running = lock.acquire('k', () => gate.promise, {maxOccupationTime: 0});
       await assert.rejects(
         lock.acquire('k', () => void (ran = true)),
-        /Maximum occupation time is exceeded in queue k/,
+        (e: any) =>
+          e instanceof LockTimeoutError &&
+          e.code === 'ERR_ASYNCBOX_LOCK_TIMEOUT' &&
+          /Maximum occupation time is exceeded in queue k/.test(e.message),
       );
       gate.resolve();
       await running;
@@ -406,7 +409,13 @@ describe('AsyncLock', function () {
         {maxOccupationTime: 10},
       );
       const next = lock.acquire('k', () => void log.push('next'));
-      await assert.rejects(slow, /Maximum occupation time is exceeded while executing k/);
+      await assert.rejects(
+        slow,
+        (e: any) =>
+          e instanceof LockTimeoutError &&
+          e.code === 'ERR_ASYNCBOX_LOCK_TIMEOUT' &&
+          /Maximum occupation time is exceeded while executing k/.test(e.message),
+      );
       assert.deepEqual(log, []);
       gate.resolve();
       await next;

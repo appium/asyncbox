@@ -253,8 +253,9 @@ Times are in ms, up to 2147483647, and `0` means no limit.
 
 ### Errors
 
-All errors thrown by this package extend `AsyncboxError` and carry a stable `code`,
-so match them by `instanceof` or `err.code` instead of the message text:
+The built-in errors of this package extend `AsyncboxError` and carry a stable `code`,
+so match them by `instanceof` or `err.code` instead of the message text. Caller-supplied
+errors (e.g. the `error` option of `waitForCondition`) are passed through as is:
 
 | Class | `code` | Thrown by |
 | --- | --- | --- |
@@ -263,8 +264,6 @@ so match them by `instanceof` or `err.code` instead of the message text:
 | `LockTimeoutError` (extends `TimeoutError`) | `ERR_ASYNCBOX_LOCK_TIMEOUT` | `AsyncLock` (queue, execution or occupation time exceeded) |
 | `LockQueueFullError` | `ERR_ASYNCBOX_LOCK_QUEUE_FULL` | `AsyncLock` (`maxPending` reached) |
 | `PromiseCancellationError` | `ERR_ASYNCBOX_CANCELLED` | `sleep` cancellation |
-
-Messages are unchanged, so existing message-based checks keep working.
 
 ### Run the tests
 
