@@ -19,9 +19,9 @@ export async function asyncfilter<T>(
   const filterAsync = async (value: T): Promise<boolean> => filter(value);
   if (options === false) {
     const results: T[] = [];
-    for (const item of coll) {
-      if (await filterAsync(item)) {
-        results.push(item);
+    for (let i = 0; i < coll.length; i++) {
+      if (i in coll && (await filterAsync(coll[i]))) {
+        results.push(coll[i]);
       }
     }
     return results;

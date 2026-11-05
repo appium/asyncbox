@@ -19,8 +19,10 @@ export async function asyncmap<T, R>(
   const mapperAsync = async (value: T): Promise<R> => mapper(value);
   if (options === false) {
     const results: R[] = [];
-    for (const item of coll) {
-      results.push(await mapperAsync(item));
+    for (let i = 0; i < coll.length; i++) {
+      if (i in coll) {
+        results.push(await mapperAsync(coll[i]));
+      }
     }
     return results;
   }

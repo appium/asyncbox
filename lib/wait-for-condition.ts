@@ -29,11 +29,8 @@ export async function waitForCondition<T>(
   const error = opts.error;
   const begunAt = performance.now();
   const endAt = begunAt + opts.waitMs;
-  while (true) {
-    const result = await condFn();
-    if (result) {
-      return result;
-    }
+  let result = await condFn();
+  while (!result) {
     const now = performance.now();
     const waited = Math.round(now - begunAt);
     const remainingTime = endAt - now;
@@ -46,5 +43,7 @@ export async function waitForCondition<T>(
     }
     debug(`Waited for ${waited} ms so far`);
     await sleep(Math.min(opts.intervalMs, remainingTime));
+    result = await condFn();
   }
+  return result;
 }

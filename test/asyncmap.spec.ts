@@ -42,6 +42,21 @@ describe('asyncmap', function () {
     assert.deepStrictEqual(await asyncmap(coll, syncFn, false), expected);
     assert.deepStrictEqual(await asyncmap(coll, syncFn), expected);
   });
+  it('should skip holes in sparse arrays when mapping serially', async function () {
+    const seen: number[] = [];
+    // eslint-disable-next-line no-sparse-arrays
+    const sparse = [1, , 3] as number[];
+    const result = await asyncmap(
+      sparse,
+      async (el: number) => {
+        seen.push(el);
+        return el * 2;
+      },
+      false,
+    );
+    assert.deepStrictEqual(result, [2, 6]);
+    assert.deepStrictEqual(seen, [1, 3]);
+  });
   it('should raise an error if options is null', async function () {
     await assert.rejects(() => asyncmap(coll, makeFn().fn, null as any), /Options cannot be null/);
   });
