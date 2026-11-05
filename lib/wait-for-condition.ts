@@ -29,24 +29,21 @@ export async function waitForCondition<T>(
   const error = opts.error;
   const begunAt = performance.now();
   const endAt = begunAt + opts.waitMs;
-  const spin = async function spin(): Promise<T> {
-    const result = await condFn();
-    if (result) {
-      return result;
-    }
+  let result = await condFn();
+  while (!result) {
     const now = performance.now();
     const waited = Math.round(now - begunAt);
     const remainingTime = endAt - now;
-    if (now < endAt) {
-      debug(`Waited for ${waited} ms so far`);
-      await sleep(Math.min(opts.intervalMs, remainingTime));
-      return await spin();
+    if (now >= endAt) {
+      // if there is an error option, it is either a string message or an error itself
+      if (error) {
+        throw typeof error === 'string' ? new Error(error) : error;
+      }
+      throw new Error(`Condition unmet after ${waited} ms. Timing out.`);
     }
-    // if there is an error option, it is either a string message or an error itself
-    if (error) {
-      throw typeof error === 'string' ? new Error(error) : error;
-    }
-    throw new Error(`Condition unmet after ${waited} ms. Timing out.`);
-  };
-  return await spin();
+    debug(`Waited for ${waited} ms so far`);
+    await sleep(Math.min(opts.intervalMs, remainingTime));
+    result = await condFn();
+  }
+  return result;
 }

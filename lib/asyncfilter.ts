@@ -18,13 +18,13 @@ export async function asyncfilter<T>(
   // limitFunction requires the filter to always return a promise
   const filterAsync = async (value: T): Promise<boolean> => filter(value);
   if (options === false) {
-    return coll.reduce<Promise<T[]>>(async (accP, item) => {
-      const acc = await accP;
-      if (await filterAsync(item)) {
-        acc.push(item);
+    const results: T[] = [];
+    for (let i = 0; i < coll.length; i++) {
+      if (i in coll && (await filterAsync(coll[i]))) {
+        results.push(coll[i]);
       }
-      return acc;
-    }, Promise.resolve([]));
+    }
+    return results;
   }
   const adjustedFilter =
     options === true ? filterAsync : (await getLimitFunction())(filterAsync, {concurrency: options.concurrency});

@@ -42,6 +42,21 @@ describe('asyncfilter', function () {
     assert.deepStrictEqual(await asyncfilter(coll, syncFn, false), expected);
     assert.deepStrictEqual(await asyncfilter(coll, syncFn), expected);
   });
+  it('should skip holes in sparse arrays when filtering serially', async function () {
+    const seen: number[] = [];
+    // eslint-disable-next-line no-sparse-arrays
+    const sparse = [1, , 2, , 4] as number[];
+    const result = await asyncfilter(
+      sparse,
+      async (el: number) => {
+        seen.push(el);
+        return el % 2 === 0;
+      },
+      false,
+    );
+    assert.deepStrictEqual(result, [2, 4]);
+    assert.deepStrictEqual(seen, [1, 2, 4]);
+  });
   it('should raise an error if options is null', async function () {
     await assert.rejects(() => asyncfilter(coll, makeFn().fn, null as any), /Options cannot be null/);
   });
