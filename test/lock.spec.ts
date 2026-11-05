@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import {AsyncLocalStorage} from 'node:async_hooks';
 import {describe, it} from 'node:test';
 
+import {AsyncboxError, LockQueueFullError, LockTimeoutError, TimeoutError} from '../lib/errors.js';
 import {AsyncLock} from '../lib/lock.js';
 import {sleep} from '../lib/sleep.js';
 
@@ -510,7 +511,10 @@ describe('AsyncLock', function () {
       const holder = lock.acquire(['a', 'b'], () => gate.promise);
       const trigger = lock.acquire('b', () => t.mock.timers.tick(100));
       const victim = lock.acquire('a', () => void (victimRan = true), {timeout: 50});
-      const victimOutcome = assert.rejects(victim, /timed out in queue a/);
+      const victimOutcome = assert.rejects(
+        victim,
+        (e) => e instanceof LockTimeoutError && /timed out in queue a/.test(e.message),
+      );
       gate.resolve();
       await Promise.all([holder, trigger, victimOutcome]);
       await Promise.resolve();
@@ -564,6 +568,48 @@ describe('AsyncLock', function () {
       gate.resolve();
       await p;
       assert.ok(!lock.isBusy());
+    });
+  });
+
+  describe('error classes', function () {
+    it('should reject with LockTimeoutError (a TimeoutError) when the queue wait times out', async function () {
+      const lock = new AsyncLock();
+      const gate = deferred();
+      const holder = lock.acquire('k', () => gate.promise);
+      await assert.rejects(
+        lock.acquire('k', () => 1, {timeout: 20}),
+        (e: any) => {
+          assert.ok(e instanceof LockTimeoutError);
+          assert.ok(e instanceof TimeoutError);
+          assert.ok(e instanceof AsyncboxError);
+          assert.strictEqual(e.code, 'ERR_ASYNCBOX_LOCK_TIMEOUT');
+          return true;
+        },
+      );
+      gate.resolve();
+      await holder;
+    });
+    it('should reject with LockTimeoutError when the execution time is exceeded', async function () {
+      const lock = new AsyncLock();
+      await assert.rejects(
+        lock.acquire('k', () => new Promise(() => {}), {maxExecutionTime: 20}),
+        LockTimeoutError,
+      );
+    });
+    it('should reject with LockQueueFullError when maxPending is reached', async function () {
+      const lock = new AsyncLock({maxPending: 0});
+      const gate = deferred();
+      const holder = lock.acquire('k', () => gate.promise);
+      await assert.rejects(
+        lock.acquire('k', () => 1),
+        (e: any) => {
+          assert.ok(e instanceof LockQueueFullError);
+          assert.strictEqual(e.code, 'ERR_ASYNCBOX_LOCK_QUEUE_FULL');
+          return true;
+        },
+      );
+      gate.resolve();
+      await holder;
     });
   });
 });

@@ -1,4 +1,11 @@
-export {TimeoutError, PromiseCancellationError} from './errors.js';
+export {
+  AsyncboxError,
+  TimeoutError,
+  ConditionUnmetError,
+  LockTimeoutError,
+  LockQueueFullError,
+  PromiseCancellationError,
+} from './errors.js';
 export {sleep} from './sleep.js';
 export {withTimeout} from './with-timeout.js';
 export {longSleep} from './long-sleep.js';

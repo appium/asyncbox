@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
 
+import {ConditionUnmetError, TimeoutError} from '../lib/errors.js';
 import {waitForCondition} from '../lib/wait-for-condition.js';
 import {recordTimeoutDelays} from './helpers.js';
 
@@ -45,5 +46,22 @@ describe('waitForCondition', function () {
     assert.strictEqual(sleeps[0], 50);
     // only the time left is slept on the next spin
     assert.ok(sleeps[1] < 50);
+  });
+  it('should reject with ConditionUnmetError (a TimeoutError) carrying a code', async function () {
+    await assert.rejects(
+      waitForCondition(() => false, {waitMs: 20, intervalMs: 10}),
+      (e: any) => {
+        assert.ok(e instanceof ConditionUnmetError);
+        assert.ok(e instanceof TimeoutError);
+        assert.strictEqual(e.code, 'ERR_ASYNCBOX_CONDITION_UNMET');
+        return true;
+      },
+    );
+  });
+  it('should wrap a string error option into ConditionUnmetError', async function () {
+    await assert.rejects(
+      waitForCondition(() => false, {waitMs: 20, intervalMs: 10, error: 'custom'}),
+      (e: any) => e instanceof ConditionUnmetError && e.message === 'custom',
+    );
   });
 });
