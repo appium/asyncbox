@@ -158,10 +158,10 @@ const newItemsMaxTwo = await asyncmap(items, slowSquare, {concurrency: 2});
 Takes a condition (a function returning a boolean or boolean promise),
 and waits until the condition is true.
 
-Throws a `/Condition unmet/` error if the condition has not been
-satisfied within the allocated time, unless an error is provided in
-the options, as the `error` property, which is either thrown itself, or
-used as the message.
+Throws a `ConditionUnmetError` (message matches `/Condition unmet/`) if the
+condition has not been satisfied within the allocated time, unless an error is
+provided in the options, as the `error` property, which is either thrown itself,
+or used as the message of a `ConditionUnmetError`.
 
 The condition result is returned if it is not falsy. If the condition
 throws an error then this exception will be immediately passed through.
@@ -250,6 +250,20 @@ Times are in ms, up to 2147483647, and `0` means no limit.
 - `maxExecutionTime` (default `0`) - max time the task may run while holding the lock; the lock is released when exceeded (for a multi-key call, it counts from when all keys are held and releases all of them)
 - `maxPending` (default `1000`) - max tasks waiting per key; further ones are rejected right away, so `0` rejects every task that would have to wait
 - `skipQueue` (default `false`, per call only) - put the task at the front of the queue
+
+### Errors
+
+The built-in errors of this package extend `AsyncboxError` and carry a stable `code`,
+so match them by `instanceof` or `err.code` instead of the message text. Caller-supplied
+errors (e.g. the `error` option of `waitForCondition`) are passed through as is:
+
+| Class | `code` | Thrown by |
+| --- | --- | --- |
+| `TimeoutError` | `ERR_ASYNCBOX_TIMEOUT` | `withTimeout` |
+| `ConditionUnmetError` (extends `TimeoutError`) | `ERR_ASYNCBOX_CONDITION_UNMET` | `waitForCondition` |
+| `LockTimeoutError` (extends `TimeoutError`) | `ERR_ASYNCBOX_LOCK_TIMEOUT` | `AsyncLock` (queue, execution or occupation time exceeded) |
+| `LockQueueFullError` | `ERR_ASYNCBOX_LOCK_QUEUE_FULL` | `AsyncLock` (`maxPending` reached) |
+| `PromiseCancellationError` | `ERR_ASYNCBOX_CANCELLED` | `sleep` cancellation |
 
 ### Run the tests
 

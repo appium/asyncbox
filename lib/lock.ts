@@ -1,5 +1,7 @@
 import {AsyncResource} from 'node:async_hooks';
 
+import {LockQueueFullError, LockTimeoutError} from './errors.js';
+
 const DEFAULT_MAX_PENDING = 1000;
 // setTimeout fires after 1 ms for anything above this
 const MAX_TIMER_MS = 2 ** 31 - 1;
@@ -146,7 +148,7 @@ class KeyClaim {
       return true;
     }
     if (queue.length >= maxPending) {
-      this.onDenied(new Error(`Too many pending tasks in queue ${this.key}`));
+      this.onDenied(new LockQueueFullError(`Too many pending tasks in queue ${this.key}`));
     } else {
       if (skipQueue) {
         queue.unshift(this.grant);
@@ -155,7 +157,7 @@ class KeyClaim {
       }
       if (timeout) {
         this.queueTimer = setTimeout(
-          () => this.onDenied(new Error(`async-lock timed out in queue ${this.key}`)),
+          () => this.onDenied(new LockTimeoutError(`async-lock timed out in queue ${this.key}`)),
           timeout,
         );
       }
@@ -279,7 +281,7 @@ class Acquisition<T> {
     this.running = true;
     if (maxExecutionTime) {
       this.executionTimer = setTimeout(
-        () => this.abort(new Error(`Maximum execution time is exceeded ${this.keys.join(', ')}`)),
+        () => this.abort(new LockTimeoutError(`Maximum execution time is exceeded ${this.keys.join(', ')}`)),
         maxExecutionTime,
       );
     }
@@ -304,9 +306,9 @@ class Acquisition<T> {
   private expire(): void {
     const keys = this.keys.join(', ');
     if (this.running) {
-      this.settle({error: new Error(`Maximum occupation time is exceeded while executing ${keys}`)});
+      this.settle({error: new LockTimeoutError(`Maximum occupation time is exceeded while executing ${keys}`)});
     } else {
-      this.abort(new Error(`Maximum occupation time is exceeded in queue ${keys}`));
+      this.abort(new LockTimeoutError(`Maximum occupation time is exceeded in queue ${keys}`));
     }
   }
 

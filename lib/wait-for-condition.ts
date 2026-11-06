@@ -1,3 +1,4 @@
+import {ConditionUnmetError} from './errors.js';
 import {sleep} from './sleep.js';
 import type {WaitForConditionOptions} from './types.js';
 
@@ -5,7 +6,7 @@ import type {WaitForConditionOptions} from './types.js';
  * Takes a condition (a function returning a boolean or boolean promise), and
  * waits until the condition is true.
  *
- * Throws a `/Condition unmet/` error if the condition has not been satisfied
+ * Throws a {@link ConditionUnmetError} (a {@link TimeoutError}; message matches `/Condition unmet/`) if the condition has not been satisfied
  * within the allocated time, unless an error is provided in the options, as the
  * `error` property, which is either thrown itself, or used as the message.
  *
@@ -44,9 +45,9 @@ export async function waitForCondition<T>(
     }
     // if there is an error option, it is either a string message or an error itself
     if (error) {
-      throw typeof error === 'string' ? new Error(error) : error;
+      throw typeof error === 'string' ? new ConditionUnmetError(error) : error;
     }
-    throw new Error(`Condition unmet after ${waited} ms. Timing out.`);
+    throw new ConditionUnmetError(`Condition unmet after ${waited} ms. Timing out.`);
   };
   return await spin();
 }
