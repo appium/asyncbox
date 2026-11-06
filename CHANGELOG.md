@@ -1,3 +1,9 @@
+## [6.6.0](https://github.com/appium/asyncbox/compare/v6.5.0...v6.6.0) (2026-11-06)
+
+### Features
+
+* add error hierarchy with codes ([#92](https://github.com/appium/asyncbox/issues/92)) ([40b60dd](https://github.com/appium/asyncbox/commit/40b60dd44b34d2ca7522a6a815b9f38cd6c22f06))
+
 ## [6.5.0](https://github.com/appium/asyncbox/compare/v6.4.3...v6.5.0) (2026-10-23)
 
 ### Features
