@@ -64,4 +64,27 @@ describe('waitForCondition', function () {
       (e: any) => e instanceof ConditionUnmetError && e.message === 'custom',
     );
   });
+  it('should return immediately without sleeping when the first poll succeeds', async function (t) {
+    const delays = recordTimeoutDelays(t);
+    const messages: string[] = [];
+    const result = await waitForCondition(() => 42, {
+      waitMs: 100,
+      intervalMs: 10,
+      logger: {debug: (msg: string) => messages.push(msg)},
+    });
+    assert.strictEqual(result, 42);
+    assert.deepStrictEqual(delays, []);
+    assert.deepStrictEqual(messages, []);
+  });
+  it('should log debug messages between iterative polls until satisfied', async function () {
+    const messages: string[] = [];
+    let calls = 0;
+    const result = await waitForCondition(() => ++calls === 3 && 'ok', {
+      waitMs: 500,
+      intervalMs: 1,
+      logger: {debug: (msg: string) => messages.push(msg)},
+    });
+    assert.strictEqual(result, 'ok');
+    assert.strictEqual(messages.length, 2);
+  });
 });

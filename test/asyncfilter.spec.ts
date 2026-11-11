@@ -42,6 +42,41 @@ describe('asyncfilter', function () {
     assert.deepStrictEqual(await asyncfilter(coll, syncFn, false), expected);
     assert.deepStrictEqual(await asyncfilter(coll, syncFn), expected);
   });
+  it('should skip holes in sparse arrays when filtering serially', async function () {
+    const seen: number[] = [];
+    const sparse: number[] = [1, 99, 2, 99, 4];
+    delete sparse[1];
+    delete sparse[3];
+    const result = await asyncfilter(
+      sparse,
+      async (el: number) => {
+        seen.push(el);
+        return el % 2 === 0;
+      },
+      false,
+    );
+    assert.deepStrictEqual(result, [2, 4]);
+    assert.deepStrictEqual(seen, [1, 2, 4]);
+  });
+  it('should snapshot elements up front when collection mutates during serial filtering', async function () {
+    const mutating = [1, 2, 3, 4];
+    const result = await asyncfilter(
+      mutating,
+      async (el: number) => {
+        await sleep(5);
+        if (el === 1) {
+          mutating.push(6);
+          mutating[1] = 99;
+          delete mutating[3];
+        } else if (el === 2) {
+          mutating[1] = 77;
+        }
+        return el % 2 === 0;
+      },
+      false,
+    );
+    assert.deepStrictEqual(result, [2, 4]);
+  });
   it('should raise an error if options is null', async function () {
     await assert.rejects(() => asyncfilter(coll, makeFn().fn, null as any), /Options cannot be null/);
   });

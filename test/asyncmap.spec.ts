@@ -42,6 +42,38 @@ describe('asyncmap', function () {
     assert.deepStrictEqual(await asyncmap(coll, syncFn, false), expected);
     assert.deepStrictEqual(await asyncmap(coll, syncFn), expected);
   });
+  it('should skip holes in sparse arrays when mapping serially', async function () {
+    const seen: number[] = [];
+    const sparse: number[] = [1, 2, 3];
+    delete sparse[1];
+    const result = await asyncmap(
+      sparse,
+      async (el: number) => {
+        seen.push(el);
+        return el * 2;
+      },
+      false,
+    );
+    assert.deepStrictEqual(result, [2, 6]);
+    assert.deepStrictEqual(seen, [1, 3]);
+  });
+  it('should snapshot elements up front when collection mutates during serial mapping', async function () {
+    const mutating = [1, 2, 3, 4];
+    const result = await asyncmap(
+      mutating,
+      async (el: number) => {
+        await sleep(5);
+        if (el === 1) {
+          mutating.push(5);
+          mutating[1] = 20;
+          delete mutating[2];
+        }
+        return el * 2;
+      },
+      false,
+    );
+    assert.deepStrictEqual(result, [2, 4, 6, 8]);
+  });
   it('should raise an error if options is null', async function () {
     await assert.rejects(() => asyncmap(coll, makeFn().fn, null as any), /Options cannot be null/);
   });
