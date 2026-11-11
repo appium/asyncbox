@@ -1,3 +1,9 @@
+## [6.6.1](https://github.com/appium/asyncbox/compare/v6.6.0...v6.6.1) (2026-11-11)
+
+### Performance Improvements
+
+* use iterative loops in waitForCondition, asyncmap, and asyncfilter ([#91](https://github.com/appium/asyncbox/issues/91)) ([975f44e](https://github.com/appium/asyncbox/commit/975f44edddd7332243bb663efa1f6e303e1ad9e8))
+
 ## [6.6.0](https://github.com/appium/asyncbox/compare/v6.5.0...v6.6.0) (2026-11-06)
 
 ### Features
