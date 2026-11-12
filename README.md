@@ -7,7 +7,7 @@ A collection of ES7 async/await utilities. Install via NPM:
 npm install asyncbox
 ```
 
-Published as both ESM and CommonJS, so `import {sleep} from 'asyncbox'` and `const {sleep} = require('asyncbox')` both work.
+ESM only. Use `import {sleep} from 'asyncbox'`; CommonJS `require()` is no longer supported by the package itself.
 
 Then, behold!
 

@@ -1,4 +1,4 @@
-import {getLimitFunction} from './limit-function.js';
+import {limitFunction} from './limit-function.js';
 import type {MapFilterOptions} from './types.js';
 
 /**
@@ -31,7 +31,7 @@ export async function asyncfilter<T>(
     return results;
   }
   const adjustedFilter =
-    options === true ? filterAsync : (await getLimitFunction())(filterAsync, {concurrency: options.concurrency});
+    options === true ? filterAsync : limitFunction(filterAsync, {concurrency: options.concurrency});
   const bools = await Promise.all(coll.map(adjustedFilter));
   return coll.reduce<T[]>((acc, item, i) => {
     if (bools[i]) {

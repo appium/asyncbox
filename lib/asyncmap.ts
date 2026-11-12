@@ -1,4 +1,4 @@
-import {getLimitFunction} from './limit-function.js';
+import {limitFunction} from './limit-function.js';
 import type {MapFilterOptions} from './types.js';
 
 /**
@@ -28,6 +28,6 @@ export async function asyncmap<T, R>(
     return results;
   }
   const adjustedMapper =
-    options === true ? mapperAsync : (await getLimitFunction())(mapperAsync, {concurrency: options.concurrency});
+    options === true ? mapperAsync : limitFunction(mapperAsync, {concurrency: options.concurrency});
   return Promise.all(coll.map(adjustedMapper));
 }
