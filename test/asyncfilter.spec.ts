@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
 
-import {asyncfilter} from '../lib/asyncfilter.js';
-import {sleep} from '../lib/sleep.js';
+import {asyncfilter} from '../lib/collections/asyncfilter.js';
+import {sleep} from '../lib/time/sleep.js';
 import {createConcurrencyTracker} from './helpers.js';
 
 describe('asyncfilter', function () {

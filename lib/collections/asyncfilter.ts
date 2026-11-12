@@ -1,5 +1,5 @@
+import type {MapFilterOptions} from '../shared/types.js';
 import {limitFunction} from './limit-function.js';
-import type {MapFilterOptions} from './types.js';
 
 /**
  * Similar to `Array.prototype.filter`; runs in parallel, serial, or with custom concurrency pool

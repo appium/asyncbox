@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
 
-import {limitFunction} from '../lib/limit-function.js';
-import {sleep} from '../lib/sleep.js';
+import {limitFunction} from '../lib/collections/limit-function.js';
+import {sleep} from '../lib/time/sleep.js';
 import {createConcurrencyTracker} from './helpers.js';
 
 describe('limitFunction', function () {

@@ -1,6 +1,6 @@
-import {ConditionUnmetError} from './errors.js';
+import {ConditionUnmetError} from '../shared/errors.js';
+import type {WaitForConditionOptions} from '../shared/types.js';
 import {sleep} from './sleep.js';
-import type {WaitForConditionOptions} from './types.js';
 
 /**
  * Takes a condition (a function returning a boolean or boolean promise), and

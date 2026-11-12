@@ -1,6 +1,6 @@
 import {AsyncResource} from 'node:async_hooks';
 
-import {LockQueueFullError, LockTimeoutError} from './errors.js';
+import {LockQueueFullError, LockTimeoutError} from '../shared/errors.js';
 
 const DEFAULT_MAX_PENDING = 1000;
 // setTimeout fires after 1 ms for anything above this

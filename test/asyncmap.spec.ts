@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
 
-import {asyncmap} from '../lib/asyncmap.js';
-import {sleep} from '../lib/sleep.js';
+import {asyncmap} from '../lib/collections/asyncmap.js';
+import {sleep} from '../lib/time/sleep.js';
 import {createConcurrencyTracker} from './helpers.js';
 
 describe('asyncmap', function () {
