@@ -45,8 +45,8 @@ describe('asyncfilter', function () {
   it('should skip holes in sparse arrays when filtering serially', async function () {
     const seen: number[] = [];
     const sparse: number[] = [1, 99, 2, 99, 4];
-    delete sparse[1];
-    delete sparse[3];
+    Reflect.deleteProperty(sparse, 1);
+    Reflect.deleteProperty(sparse, 3);
     const result = await asyncfilter(
       sparse,
       async (el: number) => {
@@ -67,7 +67,7 @@ describe('asyncfilter', function () {
         if (el === 1) {
           mutating.push(6);
           mutating[1] = 99;
-          delete mutating[3];
+          Reflect.deleteProperty(mutating, 3);
         } else if (el === 2) {
           mutating[1] = 77;
         }

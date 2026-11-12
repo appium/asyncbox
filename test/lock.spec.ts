@@ -94,7 +94,9 @@ describe('AsyncLock', function () {
     const sparse: string[] = [];
     sparse[0] = 'a';
     sparse[2] = 'b'; // leaves a hole at index 1
-    for (const key of [undefined, null, 1, {}, ['valid', 123], [undefined], sparse, new Array(2)]) {
+    const holes: string[] = [];
+    holes.length = 2;
+    for (const key of [undefined, null, 1, {}, ['valid', 123], [undefined], sparse, holes]) {
       assert.throws(() => lock.acquire(key as any, () => 1), TypeError);
     }
     assert.ok(!lock.isBusy());

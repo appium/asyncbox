@@ -94,7 +94,7 @@ export class AsyncLock {
     }
     validateOptions(opts);
     // A canonical order keeps overlapping multi-key calls, e.g. ['a', 'b'] and ['b', 'a'], from deadlocking
-    const keys = typeof key === 'string' ? [key] : [...new Set(key)].sort();
+    const keys = typeof key === 'string' ? [key] : [...new Set(key)].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
     const acquisition = new Acquisition(this.queues, keys, fn, {...this.defaults, ...stripUndefined(opts)});
     acquisition.enqueue();
     return acquisition.promise;
@@ -285,10 +285,17 @@ class Acquisition<T> {
         maxExecutionTime,
       );
     }
-    new Promise<T>((resolve) => resolve(this.task())).then(
-      (value) => this.finish({value}),
-      (error) => this.finish({error}),
-    );
+    void this.runTask();
+  }
+
+  private async runTask(): Promise<void> {
+    let outcome: Outcome<T>;
+    try {
+      outcome = {value: await this.task()};
+    } catch (error) {
+      outcome = {error};
+    }
+    this.finish(outcome);
   }
 
   private finish(outcome: Outcome<T>): void {
