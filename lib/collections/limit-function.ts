@@ -10,19 +10,25 @@ export function limitFunction<A extends unknown[], R>(
   }
   let active = 0;
   const queue: (() => void)[] = [];
-  const next = () => {
-    active--;
-    queue.shift()?.();
+  // Hand the slot directly to the next waiter so a new caller can't slip in between
+  const release = () => {
+    const waiter = queue.shift();
+    if (waiter) {
+      waiter();
+    } else {
+      active--;
+    }
   };
   return async (...args) => {
-    if (active >= concurrency) {
+    if (active < concurrency) {
+      active++;
+    } else {
       await new Promise<void>((resolve) => queue.push(resolve));
     }
-    active++;
     try {
       return await fn(...args);
     } finally {
-      next();
+      release();
     }
   };
 }

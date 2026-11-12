@@ -18,6 +18,47 @@ describe('limitFunction', function () {
     assert.deepStrictEqual(await Promise.all([1, 2, 3, 4, 5].map(fn)), [1, 2, 3, 4, 5]);
     assert.strictEqual(tracker.max, 2);
   });
+  it('should not exceed the limit when a new call races a released slot', async function () {
+    const tracker = createConcurrencyTracker();
+    const fn = limitFunction(
+      tracker.wrap(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      }),
+      {concurrency: 1},
+    );
+    const calls = [fn(), fn()];
+    let chain = Promise.resolve();
+    for (let i = 0; i < 6; i++) {
+      chain = chain.then(() => {
+        calls.push(fn());
+      });
+    }
+    await chain;
+    await Promise.all(calls);
+    assert.strictEqual(tracker.max, 1);
+  });
+  it('should start queued calls in FIFO order', async function () {
+    const order: number[] = [];
+    const fn = limitFunction(
+      async (n: number) => {
+        order.push(n);
+        await sleep(1);
+      },
+      {concurrency: 1},
+    );
+    await Promise.all([1, 2, 3, 4].map(fn));
+    assert.deepStrictEqual(order, [1, 2, 3, 4]);
+  });
+  it('should allow Infinity concurrency', async function () {
+    const tracker = createConcurrencyTracker();
+    const fn = limitFunction(
+      tracker.wrap(async () => sleep(5)),
+      {concurrency: Infinity},
+    );
+    await Promise.all([1, 2, 3].map(() => fn()));
+    assert.strictEqual(tracker.max, 3);
+  });
   it('should free the slot when a call rejects', async function () {
     const fn = limitFunction(
       async (n: number) => {
