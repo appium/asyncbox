@@ -1,3 +1,14 @@
+## [7.0.0](https://github.com/appium/asyncbox/compare/v6.6.1...v7.0.0) (2026-11-13)
+
+### ⚠ BREAKING CHANGES
+
+* the package is now ESM-only and no longer ships a CommonJS build; `require('asyncbox')` is no longer supported on Node versions without require(esm). 
+* Node 20 is no longer supported; engines.node is now ^22.22.2 || ^24.15.0 || >=26.0.0.
+
+### Features
+
+* drop CJS build and p-limit dependency ([#93](https://github.com/appium/asyncbox/issues/93)) ([bf72ec7](https://github.com/appium/asyncbox/commit/bf72ec72a4e80f5d90db333e8878872b844c96df))
+
 ## [6.6.1](https://github.com/appium/asyncbox/compare/v6.6.0...v6.6.1) (2026-11-11)
 
 ### Performance Improvements
