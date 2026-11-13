@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
 
-import {ConditionUnmetError, TimeoutError} from '../lib/errors.js';
-import {waitForCondition} from '../lib/wait-for-condition.js';
+import {ConditionUnmetError, TimeoutError} from '../lib/shared/errors.js';
+import {waitForCondition} from '../lib/time/wait-for-condition.js';
 import {recordTimeoutDelays} from './helpers.js';
 
 describe('waitForCondition', function () {

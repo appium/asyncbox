@@ -1,4 +1,4 @@
-import {TimeoutError} from './errors.js';
+import {TimeoutError} from '../shared/errors.js';
 
 /**
  * Resolves with `promise` or rejects if it does not settle before `timeoutMs`.

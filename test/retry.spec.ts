@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {beforeEach, describe, it} from 'node:test';
 
-import {retry, retryInterval} from '../lib/retry.js';
-import {sleep} from '../lib/sleep.js';
+import {retry, retryInterval} from '../lib/time/retry.js';
+import {sleep} from '../lib/time/sleep.js';
 import {recordTimeoutDelays} from './helpers.js';
 
 describe('retry', function () {

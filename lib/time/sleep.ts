@@ -1,5 +1,5 @@
-import {PromiseCancellationError} from './errors.js';
-import type {CancellablePromise, SleepArg, SleepOptions} from './types.js';
+import {PromiseCancellationError} from '../shared/errors.js';
+import type {CancellablePromise, SleepArg, SleepOptions} from '../shared/types.js';
 
 /**
  * An async/await version of `setTimeout`. The returned promise has a `cancel()` method that clears

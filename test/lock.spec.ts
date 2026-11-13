@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import {AsyncLocalStorage} from 'node:async_hooks';
 import {describe, it} from 'node:test';
 
-import {AsyncboxError, LockQueueFullError, LockTimeoutError, TimeoutError} from '../lib/errors.js';
-import {AsyncLock} from '../lib/lock.js';
-import {sleep} from '../lib/sleep.js';
+import {AsyncLock} from '../lib/lock/lock.js';
+import {AsyncboxError, LockQueueFullError, LockTimeoutError, TimeoutError} from '../lib/shared/errors.js';
+import {sleep} from '../lib/time/sleep.js';
 
 function deferred<T = void>() {
   let resolve!: (v: T) => void;
@@ -94,7 +94,9 @@ describe('AsyncLock', function () {
     const sparse: string[] = [];
     sparse[0] = 'a';
     sparse[2] = 'b'; // leaves a hole at index 1
-    for (const key of [undefined, null, 1, {}, ['valid', 123], [undefined], sparse, new Array(2)]) {
+    const holes: string[] = [];
+    holes.length = 2;
+    for (const key of [undefined, null, 1, {}, ['valid', 123], [undefined], sparse, holes]) {
       assert.throws(() => lock.acquire(key as any, () => 1), TypeError);
     }
     assert.ok(!lock.isBusy());

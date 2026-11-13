@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
 
-import {asyncmap} from '../lib/asyncmap.js';
-import {sleep} from '../lib/sleep.js';
+import {asyncmap} from '../lib/collections/asyncmap.js';
+import {sleep} from '../lib/time/sleep.js';
 import {createConcurrencyTracker} from './helpers.js';
 
 describe('asyncmap', function () {
@@ -45,7 +45,7 @@ describe('asyncmap', function () {
   it('should skip holes in sparse arrays when mapping serially', async function () {
     const seen: number[] = [];
     const sparse: number[] = [1, 2, 3];
-    delete sparse[1];
+    Reflect.deleteProperty(sparse, 1);
     const result = await asyncmap(
       sparse,
       async (el: number) => {
@@ -66,7 +66,7 @@ describe('asyncmap', function () {
         if (el === 1) {
           mutating.push(5);
           mutating[1] = 20;
-          delete mutating[2];
+          Reflect.deleteProperty(mutating, 2);
         }
         return el * 2;
       },

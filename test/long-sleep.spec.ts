@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
 
-import {longSleep} from '../lib/long-sleep.js';
+import {longSleep} from '../lib/time/long-sleep.js';
 import {recordTimeoutDelays} from './helpers.js';
 
 describe('longSleep', function () {

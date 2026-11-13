@@ -1,5 +1,5 @@
+import type {LongSleepOptions} from '../shared/types.js';
 import {sleep} from './sleep.js';
-import type {LongSleepOptions} from './types.js';
 
 const LONG_SLEEP_THRESHOLD = 5000; // anything over 5000ms will turn into a spin
 

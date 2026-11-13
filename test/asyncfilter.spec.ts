@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
 
-import {asyncfilter} from '../lib/asyncfilter.js';
-import {sleep} from '../lib/sleep.js';
+import {asyncfilter} from '../lib/collections/asyncfilter.js';
+import {sleep} from '../lib/time/sleep.js';
 import {createConcurrencyTracker} from './helpers.js';
 
 describe('asyncfilter', function () {
@@ -45,8 +45,8 @@ describe('asyncfilter', function () {
   it('should skip holes in sparse arrays when filtering serially', async function () {
     const seen: number[] = [];
     const sparse: number[] = [1, 99, 2, 99, 4];
-    delete sparse[1];
-    delete sparse[3];
+    Reflect.deleteProperty(sparse, 1);
+    Reflect.deleteProperty(sparse, 3);
     const result = await asyncfilter(
       sparse,
       async (el: number) => {
@@ -67,7 +67,7 @@ describe('asyncfilter', function () {
         if (el === 1) {
           mutating.push(6);
           mutating[1] = 99;
-          delete mutating[3];
+          Reflect.deleteProperty(mutating, 3);
         } else if (el === 2) {
           mutating[1] = 77;
         }

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
 
-import {TimeoutError} from '../lib/errors.js';
-import {sleep} from '../lib/sleep.js';
-import {withTimeout} from '../lib/with-timeout.js';
+import {TimeoutError} from '../lib/shared/errors.js';
+import {sleep} from '../lib/time/sleep.js';
+import {withTimeout} from '../lib/time/with-timeout.js';
 
 describe('withTimeout', function () {
   function neverSettles<T>(): Promise<T> {

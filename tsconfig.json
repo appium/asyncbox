@@ -4,8 +4,8 @@
   "compilerOptions": {
     "strict": true,
     "types": ["node"],
-    "checkJs": true
+    "checkJs": true,
+    "outDir": "build"
   },
-  "include": ["lib", "test"],
-  "exclude": ["test/*.cjs"]
+  "include": ["lib", "test"]
 }

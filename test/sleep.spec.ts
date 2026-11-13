@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import {describe, it} from 'node:test';
 
-import {PromiseCancellationError} from '../lib/errors.js';
-import {sleep} from '../lib/sleep.js';
-import type {SleepOptions} from '../lib/types.js';
+import {PromiseCancellationError} from '../lib/shared/errors.js';
+import type {SleepOptions} from '../lib/shared/types.js';
+import {sleep} from '../lib/time/sleep.js';
 import {recordTimeoutDelays} from './helpers.js';
 
 describe('sleep', function () {
