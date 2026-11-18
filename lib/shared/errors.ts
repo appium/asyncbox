@@ -28,7 +28,7 @@ export class AsyncboxError extends Error {
 
 /** Error thrown by {@link withTimeout} when the deadline is exceeded. */
 export class TimeoutError extends AsyncboxError {
-  static readonly code: string = 'ERR_ASYNCBOX_TIMEOUT';
+  static override readonly code: string = 'ERR_ASYNCBOX_TIMEOUT';
 
   constructor(message?: string, code?: string) {
     super(message ?? 'Operation timed out', code);
@@ -38,7 +38,7 @@ export class TimeoutError extends AsyncboxError {
 
 /** Thrown by {@link waitForCondition} when the condition is not met in time. */
 export class ConditionUnmetError extends TimeoutError {
-  static readonly code = 'ERR_ASYNCBOX_CONDITION_UNMET';
+  static override readonly code = 'ERR_ASYNCBOX_CONDITION_UNMET';
 
   constructor(message?: string) {
     super(message ?? 'Condition unmet');
@@ -48,7 +48,7 @@ export class ConditionUnmetError extends TimeoutError {
 
 /** Thrown by {@link AsyncLock} when a queue, execution or occupation time limit is exceeded. */
 export class LockTimeoutError extends TimeoutError {
-  static readonly code = 'ERR_ASYNCBOX_LOCK_TIMEOUT';
+  static override readonly code = 'ERR_ASYNCBOX_LOCK_TIMEOUT';
 
   constructor(message?: string) {
     super(message ?? 'Lock timed out');
@@ -58,7 +58,7 @@ export class LockTimeoutError extends TimeoutError {
 
 /** Thrown by {@link AsyncLock} when the queue of a key already holds `maxPending` tasks. */
 export class LockQueueFullError extends AsyncboxError {
-  static readonly code = 'ERR_ASYNCBOX_LOCK_QUEUE_FULL';
+  static override readonly code = 'ERR_ASYNCBOX_LOCK_QUEUE_FULL';
 
   constructor(message?: string) {
     super(message ?? 'Too many pending tasks in queue');
@@ -68,7 +68,7 @@ export class LockQueueFullError extends AsyncboxError {
 
 /** Thrown when a promise is cancelled via `cancel`. */
 export class PromiseCancellationError extends AsyncboxError {
-  static readonly code = 'ERR_ASYNCBOX_CANCELLED';
+  static override readonly code = 'ERR_ASYNCBOX_CANCELLED';
 
   constructor(message: string = 'Promise cancelled') {
     super(message);
