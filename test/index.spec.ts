@@ -53,6 +53,11 @@ describe('public API', function () {
       assert.strictEqual(new cls().code, cls.code);
     }
   });
+  it('should keep a caller-supplied code of TimeoutError', function () {
+    const e = new asyncbox.TimeoutError('custom', 'ERR_CUSTOM');
+    assert.strictEqual(e.code, 'ERR_CUSTOM');
+    assert.strictEqual(e.message, 'custom');
+  });
   describe('AsyncboxError.is', function () {
     it('should match instances of the class and of its subclasses', function () {
       assert.ok(asyncbox.ConditionUnmetError.is(new asyncbox.ConditionUnmetError()));
