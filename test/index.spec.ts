@@ -41,4 +41,39 @@ describe('public API', function () {
       assert.strictEqual(e.name, e.constructor.name);
     }
   });
+  it('should expose a static code matching the instance code', function () {
+    for (const cls of [
+      asyncbox.TimeoutError,
+      asyncbox.ConditionUnmetError,
+      asyncbox.LockTimeoutError,
+      asyncbox.LockQueueFullError,
+      asyncbox.PromiseCancellationError,
+    ]) {
+      assert.match(cls.code, /^ERR_ASYNCBOX_/);
+      assert.strictEqual(new cls().code, cls.code);
+    }
+  });
+  it('should keep a caller-supplied code of TimeoutError', function () {
+    const e = new asyncbox.TimeoutError('custom', 'ERR_CUSTOM');
+    assert.strictEqual(e.code, 'ERR_CUSTOM');
+    assert.strictEqual(e.message, 'custom');
+  });
+  describe('AsyncboxError.is', function () {
+    it('should match instances of the class and of its subclasses', function () {
+      assert.ok(asyncbox.ConditionUnmetError.is(new asyncbox.ConditionUnmetError()));
+      assert.ok(asyncbox.TimeoutError.is(new asyncbox.ConditionUnmetError()));
+      assert.ok(asyncbox.AsyncboxError.is(new asyncbox.LockQueueFullError()));
+    });
+    it('should match an error of another copy of the package by code', function () {
+      const foreign = Object.assign(new Error('custom'), {code: asyncbox.ConditionUnmetError.code});
+      assert.ok(asyncbox.ConditionUnmetError.is(foreign));
+      assert.ok(!asyncbox.TimeoutError.is(foreign));
+    });
+    it('should not match other errors and non-errors', function () {
+      assert.ok(!asyncbox.ConditionUnmetError.is(new asyncbox.TimeoutError()));
+      assert.ok(!asyncbox.ConditionUnmetError.is(new Error('Condition unmet')));
+      assert.ok(!asyncbox.ConditionUnmetError.is({code: asyncbox.ConditionUnmetError.code}));
+      assert.ok(!asyncbox.ConditionUnmetError.is(undefined));
+    });
+  });
 });
