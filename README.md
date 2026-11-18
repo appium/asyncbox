@@ -253,9 +253,13 @@ Times are in ms, up to 2147483647, and `0` means no limit.
 
 ### Errors
 
-The built-in errors of this package extend `AsyncboxError` and carry a stable `code`,
-so match them by `instanceof` or `err.code` instead of the message text. Caller-supplied
-errors (e.g. the `error` option of `waitForCondition`) are passed through as is:
+The built-in errors of this package extend `AsyncboxError` and carry a stable `code`
+(also available as a static property of each class), so match them by `Class.is(err)`
+instead of the message text. Unlike `instanceof`, `is` also matches by `code`, so it works
+for errors created by another copy of this package (e.g. a transitive dependency pinning
+another version). A subclass is recognized by `instanceof` only: `TimeoutError.is` does not
+match a `ConditionUnmetError` of another copy. Caller-supplied errors (e.g. the `error`
+option of `waitForCondition`) are passed through as is:
 
 | Class | `code` | Thrown by |
 | --- | --- | --- |
