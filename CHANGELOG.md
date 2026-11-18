@@ -1,3 +1,9 @@
+## [7.1.0](https://github.com/appium/asyncbox/compare/v7.0.0...v7.1.0) (2026-11-18)
+
+### Features
+
+* add static code and is() to AsyncboxError ([#94](https://github.com/appium/asyncbox/issues/94)) ([ae0c9de](https://github.com/appium/asyncbox/commit/ae0c9de2af53f488f56861a7c743c8ea55eddf9e))
+
 ## [7.0.0](https://github.com/appium/asyncbox/compare/v6.6.1...v7.0.0) (2026-11-13)
 
 ### ⚠ BREAKING CHANGES
